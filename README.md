@@ -1,7 +1,13 @@
 ﻿# MatchGate
 
-Alumni match review dashboard for Advancement workflows.
+Static dashboard prototype for reviewing alumni match candidates.
 
-## Status
+## Run locally
 
-Early prototype. Static UI exploration in progress.
+Open `matchGate.html` in a browser, or serve the folder:
+
+```powershell
+python -m http.server 8080
+```
+
+Reviews are stored in browser `localStorage` for this prototype.
