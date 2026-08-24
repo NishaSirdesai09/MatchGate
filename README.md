@@ -1,13 +1,15 @@
 ﻿# MatchGate
 
-Static dashboard prototype for reviewing alumni match candidates.
+Alumni match review dashboard with a Google Apps Script backend.
 
-## Run locally
+## Pieces
 
-Open `matchGate.html` in a browser, or serve the folder:
+| Piece | File | Role |
+|-------|------|------|
+| Static prototype | `matchGate.html` | localStorage-only demo |
+| Backend | `code.gs` | Shared reviews + records via Google Sheet |
 
-```powershell
-python -m http.server 8080
-```
+## Backend
 
-Reviews are stored in browser `localStorage` for this prototype.
+Deploy `code.gs` as an Apps Script Web App (Execute as Me, access Anyone).
+Sheet tabs: `Sheet1` (reviews), `Records` (people).
