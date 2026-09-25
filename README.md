@@ -19,7 +19,7 @@ This is **not** a Node/Python app with a local database. The three pieces are:
 ### 1. Prerequisites (one-time)
 
 1. A Google account with access to the MatchGate Google Sheet and Apps Script project.
-2. `ROCKETREACH_API_KEY` set in Apps Script â†’ **Project Settings â†’ Script Properties**.
+2. `ROCKETREACH_API_KEY` set in Apps Script **Project Settings Script Properties**.
 3. Apps Script deployed as a Web App: **Execute as Me**, **Who has access: Anyone**.
 4. The deployment URL copied into `REVIEWS_API_URL` near the top of `index.html`'s `<script>` section (already set in this repo).
 
@@ -48,7 +48,7 @@ Or simply open `index.html` in a browser (file://). Local HTTP is preferred so `
 ### 3. Redeploy backend after editing `code.gs`
 
 1. Paste updated `code.gs` into the Apps Script editor.
-2. **Deploy â†’ Manage deployments â†’ edit (pencil) â†’ Version: New version â†’ Deploy**.
+2. **Deploy Manage deployments edit (pencil) Version: New version Deploy**.
 3. URL stays the same  no change needed in `index.html`.
 
 ---
@@ -79,7 +79,7 @@ Four fixes were made to turn this into a genuinely usable, shared, live tool:
 
 **No server hosting required**  the "backend" is entirely a Google Sheet + a free Apps Script Web App deployment. This was a deliberate choice to keep things maintainable by non-engineers (Julie Anne is already comfortable with spreadsheet-like tools).
 
-**Why the API key is safe:** the RocketReach API key is stored as a Script Property inside Apps Script (Project Settings â†’ Script Properties), not in any code file. The browser never sees it  it only talks to the Apps Script Web App, which makes the actual RocketReach call server-side. This means the key is never exposed in `index.html`, never committed to GitHub, and never visible via "View Page Source" on the live GitHub Pages site.
+**Why the API key is safe:** the RocketReach API key is stored as a Script Property inside Apps Script (Project Settings  Script Properties), not in any code file. The browser never sees it  it only talks to the Apps Script Web App, which makes the actual RocketReach call server-side. This means the key is never exposed in `index.html`, never committed to GitHub, and never visible via "View Page Source" on the live GitHub Pages site.
 
 ---
 
@@ -154,7 +154,7 @@ The dashboard was tested against actual DMSB Advancement data (`All_DMSB_Cut2_Se
    - `Sheet1`: columns `id | action | comment | timestamp | name | conf | score | reviewer`
    - `Records`: same column structure as the original dataset (see a dashboard CSV export)
 
-2. **Apps Script Script Properties**: `ROCKETREACH_API_KEY` must be set (Project Settings â†’ Script Properties)  the script will fail to authenticate with RocketReach without this.
+2. **Apps Script Script Properties**: `ROCKETREACH_API_KEY` must be set (Project Settings  Script Properties)  the script will fail to authenticate with RocketReach without this.
 
 3. **Apps Script code**: see `code.gs` in this repo for the complete script. Handles:
    - reviews (`doPost` / default `doGet`)
@@ -162,9 +162,9 @@ The dashboard was tested against actual DMSB Advancement data (`All_DMSB_Cut2_Se
    - RocketReach lookups (`doPost` with `type: 'rocketreach_lookup'`)
    - saving RR updates to Records (`doPost` with `type: 'update_record'`)
 
-4. **Deployment**: Deploy â†’ New deployment â†’ Web app â†’ Execute as "Me" â†’ Who has access "Anyone". Copy the resulting URL into the `REVIEWS_API_URL` constant near the top of `index.html`'s `<script>` section.
+4. **Deployment**: Deploy New deployment Web app Execute as "Me"  Who has access "Anyone". Copy the resulting URL into the `REVIEWS_API_URL` constant near the top of `index.html`'s `<script>` section.
 
-5. **Redeploying after script changes**: Deploy â†’ Manage deployments â†’ edit (pencil icon) â†’ Version: New version â†’ Deploy. This keeps the same URL, so `index.html` doesn't need to be touched again.
+5. **Redeploying after script changes**: Deploy  Manage deployments  edit (pencil icon)  Version: New version  Deploy. This keeps the same URL, so `index.html` doesn't need to be touched again.
 
 ---
 
