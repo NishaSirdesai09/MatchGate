@@ -1,7 +1,7 @@
 ﻿# MatchGate Dashboard Updates & Maintenance Guide
 
-**Author:** Sunil Chaudhary  
-**Last updated:** August 2026  
+**Author:** Nisha Sirdesai  
+**Last updated:** September 2026  
 **Status:** Working prototype with live RocketReach integration, tested on real production data
 
 ---
