@@ -4,3 +4,20 @@ Thumbs.db
 *.log
 .vscode/
 .idea/
+__pycache__/
+*.pyc
+
+# Secrets
+.env
+.env.*
+!.env.example
+.venv/
+
+# Private alumni data and generated exports
+*.xlsx
+*.xls
+*.csv
+NY_Legacy_Sample_100 _files/
+
+# Imported reference package (contains data and embedded credentials)
+bbdd489f-6f2f-492f-a407-af046e3e7671/

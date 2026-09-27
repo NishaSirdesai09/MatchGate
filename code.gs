@@ -112,6 +112,139 @@ function rocketReachLookup(name, company) {
     attempts++;
   }
 
+  return attachEmailValidation(result);
+}
+
+// Reject Postmark / official / automated inboxes so outreach uses a real person email.
+var AUTOMATED_EMAIL_LOCAL_PARTS = {
+  'noreply': true, 'no-reply': true, 'no_reply': true, 'donotreply': true,
+  'do-not-reply': true, 'do_not_reply': true, 'mailer-daemon': true,
+  'postmaster': true, 'bounce': true, 'bounces': true, 'notifications': true,
+  'notification': true, 'notify': true, 'automated': true, 'auto': true,
+  'newsletter': true, 'marketing': true, 'webmaster': true, 'official': true,
+  'info': true, 'admin': true, 'support': true, 'sales': true, 'hello': true,
+  'contact': true, 'office': true, 'hr': true, 'careers': true, 'press': true,
+  'media': true, 'billing': true, 'invoices': true, 'privacy': true,
+  'legal': true, 'abuse': true, 'spam': true, 'unsubscribe': true,
+  'updates': true, 'alert': true, 'alerts': true, 'system': true, 'mailer': true
+};
+
+function isBlockedEmailDomain_(domain) {
+  var d = String(domain || '').toLowerCase();
+  if (!d) return false;
+  if (d === 'postmarkapp.com' || d === 'inbound.postmarkapp.com' || d === 'pm.mtasv.net' || d === 'mtasv.net') {
+    return true;
+  }
+  return d.slice(-15) === '.postmarkapp.com' || d.slice(-9) === '.mtasv.net';
+}
+
+function validateOutreachEmail(address, meta) {
+  var email = String(address || '').trim();
+  var info = meta || {};
+  if (!email) {
+    return { email: '', status: 'MISSING', reason: 'missing', smtp_valid: '', type: '', grade: '' };
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { email: email, status: 'REJECTED', reason: 'invalid_format', smtp_valid: info.smtp_valid || '', type: info.type || '', grade: info.grade || '' };
+  }
+  var at = email.lastIndexOf('@');
+  var local = email.slice(0, at).toLowerCase();
+  var domain = email.slice(at + 1).toLowerCase();
+  var smtp = String(info.smtp_valid || '').toLowerCase();
+  var type = String(info.type || '').toLowerCase();
+  var grade = String(info.grade || '');
+
+  if (isBlockedEmailDomain_(domain)) {
+    return { email: email, status: 'REJECTED', reason: 'postmark_or_provider', smtp_valid: smtp, type: type, grade: grade };
+  }
+  if (AUTOMATED_EMAIL_LOCAL_PARTS[local] || local.indexOf('noreply') !== -1 || local.indexOf('no-reply') !== -1) {
+    return { email: email, status: 'REJECTED', reason: 'automated_or_official', smtp_valid: smtp, type: type, grade: grade };
+  }
+  if (type === 'disposable') {
+    return { email: email, status: 'REJECTED', reason: 'disposable', smtp_valid: smtp, type: type, grade: grade };
+  }
+  if (type === 'role-based' || type === 'role_based') {
+    return { email: email, status: 'REJECTED', reason: 'role_based', smtp_valid: smtp, type: type, grade: grade };
+  }
+  if (smtp === 'invalid') {
+    return { email: email, status: 'REJECTED', reason: 'smtp_invalid', smtp_valid: smtp, type: type, grade: grade };
+  }
+  if (smtp === 'accept-all' || smtp === 'accept_all' || smtp === 'unknown') {
+    return { email: email, status: 'REVIEW', reason: smtp === 'unknown' ? 'smtp_unknown' : 'smtp_accept_all', smtp_valid: smtp, type: type, grade: grade };
+  }
+  return { email: email, status: 'USABLE', reason: 'ok', smtp_valid: smtp, type: type, grade: grade };
+}
+
+function collectLookupEmails_(result) {
+  var seen = {};
+  var items = [];
+  function add(email, meta) {
+    if (!email) return;
+    var addr = String(email).trim();
+    var key = addr.toLowerCase();
+    if (!key || seen[key]) return;
+    seen[key] = true;
+    items.push({
+      email: addr,
+      smtp_valid: meta && meta.smtp_valid ? String(meta.smtp_valid) : '',
+      type: meta && meta.type ? String(meta.type) : '',
+      grade: meta && meta.grade ? String(meta.grade) : ''
+    });
+  }
+  add(result.recommended_email, { type: 'recommended' });
+  add(result.recommended_professional_email, { type: 'professional' });
+  add(result.recommended_personal_email, { type: 'personal' });
+  add(result.current_work_email, { type: 'professional' });
+  add(result.email, null);
+  var list = result.emails;
+  if (Object.prototype.toString.call(list) === '[object Array]') {
+    for (var i = 0; i < list.length; i++) {
+      var item = list[i];
+      if (item && typeof item === 'object') {
+        add(item.email || item.address, item);
+      } else {
+        add(item, null);
+      }
+    }
+  }
+  return items;
+}
+
+function rankEmailStatus_(status) {
+  if (status === 'USABLE') return 0;
+  if (status === 'REVIEW') return 1;
+  if (status === 'REJECTED') return 2;
+  return 3;
+}
+
+function pickValidatedEmail(result) {
+  var candidates = collectLookupEmails_(result).map(function (item) {
+    return validateOutreachEmail(item.email, item);
+  });
+  candidates.sort(function (a, b) {
+    var rank = rankEmailStatus_(a.status) - rankEmailStatus_(b.status);
+    if (rank !== 0) return rank;
+    var aPersonal = a.type === 'personal' ? 0 : 1;
+    var bPersonal = b.type === 'personal' ? 0 : 1;
+    return aPersonal - bPersonal;
+  });
+  var best = null;
+  for (var i = 0; i < candidates.length; i++) {
+    if (candidates[i].status === 'USABLE' || candidates[i].status === 'REVIEW') {
+      best = candidates[i];
+      break;
+    }
+  }
+  return {
+    best: best,
+    candidates: candidates,
+    reason: best ? best.reason : (candidates.length ? 'automated_or_official' : 'missing')
+  };
+}
+
+function attachEmailValidation(result) {
+  if (!result || result.error) return result;
+  result.email_validation = pickValidatedEmail(result);
   return result;
 }
 
@@ -141,7 +274,9 @@ function updateRecord(payload) {
     rr_title: 'rr_title',
     rr_company: 'rr_company',
     rr_location: 'rr_location',
-    rr_linkedin_url: 'rr_linkedin_url'
+    rr_linkedin_url: 'rr_linkedin_url',
+    rr_email: 'rr_email',
+    rr_email_status: 'rr_email_status'
   };
 
   Object.keys(fieldMap).forEach(key => {

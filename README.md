@@ -1,4 +1,4 @@
-﻿# MatchGate Dashboard â€” Updates & Maintenance Guide
+# MatchGate Dashboard â€” Updates & Maintenance Guide
 
 **Author:** Sunil Chaudhary  
 **Last updated:** August 2026  
@@ -142,7 +142,8 @@ New controls added to the dashboard header:
 
 - **Degree filter** â€” dropdown, auto-populated from whatever degrees exist in the current `Records` data
 - **State filter** â€” dropdown, auto-populated the same way
-- **"Grad before year"** â€” number input, filters using the `legacy_Reunion Year` field as a proxy for graduation year / approximate age
+- **Region** â€” rollout presets: Tri-State (NY/NJ/CT), West Coast, Massachusetts
+- **Class from / Class to** â€” filters on `legacy_Reunion Year` / `legacy_Preferred Class Year` (e.g. 1980â€“1999 for the C-suite scraping cohort)
 - **Export CSV** â€” exports whatever is currently visible/filtered (not the full dataset), as a downloadable CSV file
 
 These combine with each other and with the existing search box and status filters (All / Auto-Accept / Accepted / Review / Rejected).
@@ -157,8 +158,11 @@ Each profile now has a **"Refresh via RocketReach"** button that:
 2. Sends the person's name and best-available employer (RocketReach's own `rr_company` if already known, otherwise falls back to the Advancement system's `legacy_Person Account: Current Employer Name`) to the backend
 3. The backend calls RocketReach's `/person/lookup` endpoint
 4. If RocketReach needs time to search (common â€” its API is asynchronous), the backend automatically polls the `/person/checkStatus` endpoint up to 4 times, 2 seconds apart, before giving up and telling the user to try again shortly
-5. Displays fresh title, company, location, and LinkedIn URL on the profile
-6. Shows a **"Save this update to Records"** button â€” click it to write `rr_title`, `rr_company`, `rr_location`, and `rr_linkedin_url` back to the Google Sheet **Records** tab (via Apps Script `update_record`). Nothing is auto-saved; the reviewer must opt in after checking the fresh data.
+5. Displays fresh title, company, location, LinkedIn URL, and **validated email** on the profile
+6. **Email validation** (same evaluate screen) rejects Postmark / automated / official inboxes (`noreply@`, `info@`, `official@`, `*.postmarkapp.com`, `*.mtasv.net`, role-based or SMTP-invalid addresses). A usable person email is labeled **Usable**; catch-all/unknown SMTP is **Needs review**; the rest are skipped and listed so reviewers can see what RocketReach returned.
+7. Shows a **"Save this update to Records"** button â€” click it to write `rr_title`, `rr_company`, `rr_location`, `rr_linkedin_url`, and if present `rr_email` / `rr_email_status` back to the Google Sheet **Records** tab (via Apps Script `update_record`). Nothing is auto-saved; the reviewer must opt in after checking the fresh data. Add the two email columns to **Records** if they are not there yet â€” missing columns are skipped and the rest still save.
+
+RocketReach + evaluate still use this dashboard path (`index.html` â†’ Apps Script `rocketreach_lookup` â†’ Accept/Flag/Reject). The `worker/pilot.py` batch path is not the live review process yet.
 
 **Rate limit awareness:** each confirmed "Refresh via RocketReach" that finds a match consumes one lookup credit (RocketReach does not charge credits for "no match found", per their docs). There is a confirmation dialog, but still no org-wide usage counter in the dashboard â€” worth discussing before wider rollout.
 
@@ -185,14 +189,14 @@ The dashboard was tested against actual DMSB Advancement data (`All_DMSB_Cut2_Se
 
 1. **Google Sheet**: needs two tabs â€”
    - `Sheet1`: columns `id | action | comment | timestamp | name | conf | score | reviewer`
-   - `Records`: same column structure as the original dataset (see a dashboard CSV export)
+   - `Records`: same column structure as the original dataset (see a dashboard CSV export). Optional for email save: `rr_email`, `rr_email_status`
 
 2. **Apps Script Script Properties**: `ROCKETREACH_API_KEY` must be set (Project Settings â†’ Script Properties) â€” the script will fail to authenticate with RocketReach without this.
 
 3. **Apps Script code**: see `code.gs` in this repo for the complete script. Handles:
    - reviews (`doPost` / default `doGet`)
    - records (`doGet` with `?type=records`)
-   - RocketReach lookups (`doPost` with `type: 'rocketreach_lookup'`)
+   - RocketReach lookups (`doPost` with `type: 'rocketreach_lookup'`), including email validation on the returned addresses
    - saving RR updates to Records (`doPost` with `type: 'update_record'`)
 
 4. **Deployment**: Deploy â†’ New deployment â†’ Web app â†’ Execute as "Me" â†’ Who has access "Anyone". Copy the resulting URL into the `REVIEWS_API_URL` constant near the top of `index.html`'s `<script>` section.
