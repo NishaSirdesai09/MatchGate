@@ -1,0 +1,51 @@
+name: Generate Deploy Info
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  generate-deploy-info:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get commit details
+        id: commit
+        run: |
+          echo "commit_hash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+          echo "commit_message<<EOF" >> $GITHUB_OUTPUT
+          git log -1 --pretty=%B >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "commit_date=$(git log -1 --pretty=%cd --date=iso)" >> $GITHUB_OUTPUT
+          echo "commit_author=$(git log -1 --pretty=%an)" >> $GITHUB_OUTPUT
+
+      - name: Create deployInfo file
+        run: |
+          if [ -f deployInfo.txt ]; then
+            echo "" >> deployInfo.txt
+            echo "******************************" >> deployInfo.txt
+            echo "" >> deployInfo.txt
+          else
+            echo "Deployment Information" > deployInfo.txt
+            echo "======================" >> deployInfo.txt
+            echo "" >> deployInfo.txt
+          fi
+          echo "Deployment Date: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> deployInfo.txt
+          echo "Commit Hash: ${{ steps.commit.outputs.commit_hash }}" >> deployInfo.txt
+          echo "Commit Message: ${{ steps.commit.outputs.commit_message }}" >> deployInfo.txt
+          echo "Commit Date: ${{ steps.commit.outputs.commit_date }}" >> deployInfo.txt
+          echo "Commit Author: ${{ steps.commit.outputs.commit_author }}" >> deployInfo.txt
+          echo "Repository: ${{ github.repository }}" >> deployInfo.txt
+          echo "Workflow Run: ${{ github.run_id }}" >> deployInfo.txt
+
+      - name: Commit and push deployInfo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add deployInfo.txt
+          git commit -m "Update deployInfo: $(date -u +'%Y-%m-%d %H:%M:%S UTC') - ${{ steps.commit.outputs.commit_hash }}"
+          git push origin HEAD:main
