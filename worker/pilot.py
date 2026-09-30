@@ -1,4 +1,4 @@
-"""Validate and enrich a private NY alumni pilot without touching MatchGate UI.
+"""Validate and enrich a private NY alumni pilot without touching the MatchIQ UI.
 
 Dry-run is the default. Live RocketReach calls require both --live and the
 explicit --confirm-credits YES flag.
@@ -23,6 +23,10 @@ import requests
 
 LOOKUP_URL = "https://api.rocketreach.co/api/v2/person/lookup"
 CHECK_STATUS_URL = "https://api.rocketreach.co/api/v2/person/checkStatus"
+SCRAPE_STATUS_URL = (
+    "https://script.google.com/macros/s/"
+    "AKfycbyI4HSVEi9ohVAz1-EBZ7U2SpJ2Aa5S-CGSp6PKwhaUXkS_X77ZLcUquAJ6uvQ_gSQ/exec"
+)
 
 HEADERS = {
     "first_name": "Person Account: First Name (Advancement)",
@@ -694,6 +698,14 @@ def append_backup_jsonl(
         handle.write(json.dumps(payload, default=str) + "\n")
 
 
+def post_scrape_status(payload: dict[str, Any]) -> None:
+    """Tell the dashboard how far the live batch has gotten. Never fail the batch."""
+    try:
+        requests.post(SCRAPE_STATUS_URL, json={"type": "scrape_status", **payload}, timeout=20)
+    except Exception:
+        return
+
+
 def run_live(
     people: list[dict[str, Any]],
     original_headers: list[str],
@@ -717,6 +729,22 @@ def run_live(
     backup_path = output_path.with_suffix(output_path.suffix + ".jsonl")
     print(f"Output file OK     : {output_path}")
     print(f"Backup log         : {backup_path}")
+
+    label = f"{normalize_state_code(home_state) if home_state else region} {min_reunion_year or ''}-{max_reunion_year or ''}".strip()
+    running = {"found": 0, "not_found": 0, "skipped": 0, "errors": 0}
+    post_scrape_status({
+        "phase": "running",
+        "label": label,
+        "current_name": "",
+        "processed": 0,
+        "total": len(people),
+        "found": 0,
+        "not_found": 0,
+        "skipped": 0,
+        "errors": 0,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "message": f"Starting {len(people)} lookups.",
+    })
 
     processed: list[tuple[dict[str, Any], list[Any], list[Any]]] = []
     total_start = time.perf_counter()
@@ -768,6 +796,28 @@ def run_live(
         ]
         focus_row = scrape_focus_row(record, result, status, queue)
         focus_row[-1] = lookup_outcome(status, error, result)
+        outcome = focus_row[-1]
+        if outcome == "FOUND":
+            running["found"] += 1
+        elif outcome == "NOT_FOUND":
+            running["not_found"] += 1
+        elif outcome == "SKIPPED_NO_EMPLOYER":
+            running["skipped"] += 1
+        else:
+            running["errors"] += 1
+        post_scrape_status({
+            "phase": "running",
+            "label": label,
+            "current_name": name,
+            "processed": position,
+            "total": len(people),
+            "found": running["found"],
+            "not_found": running["not_found"],
+            "skipped": running["skipped"],
+            "errors": running["errors"],
+            "updated_at": timestamp,
+            "message": f"Looking up {name}.",
+        })
         processed.append((record, result_values, focus_row))
         append_backup_jsonl(backup_path, record, result_values, focus_row)
         try:
@@ -792,6 +842,19 @@ def run_live(
     total_elapsed = round(time.perf_counter() - total_start, 2)
     counts = summarize_run(processed)
     print_run_summary(counts)
+    post_scrape_status({
+        "phase": "done",
+        "label": label,
+        "current_name": "",
+        "processed": counts["total"],
+        "total": len(people),
+        "found": counts.get("found", 0),
+        "not_found": counts.get("not_found", 0),
+        "skipped": counts.get("skipped_no_employer", 0),
+        "errors": counts.get("error", 0),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "message": "Scrape finished.",
+    })
     append_run_summary_sheet(
         output_path,
         counts,

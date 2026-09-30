@@ -1,4 +1,4 @@
-# MatchGate Dashboard â€” Updates & Maintenance Guide
+# MatchIQ Dashboard â€” Updates & Maintenance Guide
 
 **Author:** Sunil Chaudhary  
 **Last updated:** August 2026  
@@ -18,7 +18,7 @@ This is **not** a Node/Python app with a local database. The three pieces are:
 
 ### 1. Prerequisites (one-time)
 
-1. A Google account with access to the MatchGate Google Sheet and Apps Script project.
+1. A Google account with access to the MatchIQ Google Sheet and Apps Script project.
 2. `ROCKETREACH_API_KEY` set in Apps Script â†’ **Project Settings â†’ Script Properties**.
 3. Apps Script deployed as a Web App: **Execute as Me**, **Who has access: Anyone**.
 4. The deployment URL copied into `REVIEWS_API_URL` near the top of `index.html`'s `<script>` section (already set in this repo).
@@ -70,7 +70,7 @@ Both should return **StatusCode 200**. In the browser DevTools Network tab you s
 
 ## Data (Google Sheet â€” not this repo)
 
-Alumni records and reviews live in the MatchGate Google Sheet (`Records` and `Sheet1` tabs). Keep raw Advancement exports in Drive/Sheets; do not add Excel dumps to this repo. To change who appears in the dashboard, edit the **Records** tab and refresh.
+Alumni records and reviews live in the MatchIQ Google Sheet (`Records` and `Sheet1` tabs). Keep raw Advancement exports in Drive/Sheets; do not add Excel dumps to this repo. To change who appears in the dashboard, edit the **Records** tab and refresh.
 
 ---
 

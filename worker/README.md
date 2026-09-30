@@ -106,7 +106,7 @@ Manual verification (~9 hours per ~4k records in the meeting estimate) happens i
 Excel on **Scrape Focus** (or Pilot Results): fix company/industry/email, mark
 `human_decision` / `human_comment` on the full sheet if you use that column.
 
-### Step 5 — Into MatchGate
+### Step 5 — Into MatchIQ
 
 Evaluate still happens in the live dashboard (`index.html`): **Refresh via RocketReach** plus Accept / Flag / Reject. This worker is **not** the live RocketReach or review path yet.
 

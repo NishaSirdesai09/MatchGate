@@ -34,6 +34,12 @@ function doGet(e) {
       .setMimeType(ContentService.MimeType.JSON);
   }
 
+  if (type === 'scrape_status') {
+    return ContentService
+      .createTextOutput(JSON.stringify(readScrapeStatus_()))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
   const sheet = getSheet();
   const data = sheet.getDataRange().getValues();
   const reviews = {};
@@ -344,6 +350,27 @@ function updateRecord(payload) {
 function doPost(e) {
   const payload = JSON.parse(e.postData.contents);
 
+  if (payload.type === 'login') {
+    const result = loginReviewer_(payload.email, payload.password);
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (payload.type === 'signup') {
+    const result = signupReviewer_(payload);
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (payload.type === 'scrape_status') {
+    writeScrapeStatus_(payload);
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'ok' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
   if (payload.type === 'rocketreach_lookup') {
     const result = rocketReachLookup(payload.name, payload.company);
     return ContentService
@@ -425,4 +452,112 @@ function doPost(e) {
 function testLookup() {
   const result = rocketReachLookup('Mark Fidler', 'Berkshire Grey');
   Logger.log(JSON.stringify(result));
+}
+
+function reviewersSheet_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Reviewers');
+  if (!sheet) {
+    sheet = ss.insertSheet('Reviewers');
+    sheet.appendRow(['Email', 'Name', 'Password']);
+  }
+  return sheet;
+}
+
+function passwordHash_(value) {
+  var raw = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(value || ''), Utilities.Charset.UTF_8);
+  return raw.map(function(byte) {
+    var hex = (byte & 0xff).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  }).join('');
+}
+
+function loginReviewer_(email, password) {
+  var wanted = String(email || '').trim().toLowerCase();
+  var secret = String(password || '');
+  if (!wanted || !secret) {
+    return { error: true, message: 'Enter your email and password.' };
+  }
+  var sheet = reviewersSheet_();
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    var rowEmail = String(data[i][0] || '').trim().toLowerCase();
+    if (rowEmail !== wanted) continue;
+    var stored = String(data[i][2] || '').trim();
+    var matches = stored.length === 64 ? stored === passwordHash_(secret) : stored === secret;
+    if (!matches) return { error: true, message: 'Wrong password.' };
+    var token = Utilities.getUuid();
+    CacheService.getScriptCache().put('login_' + token, JSON.stringify({
+      email: rowEmail,
+      name: String(data[i][1] || rowEmail)
+    }), 21600);
+    return { status: 'ok', token: token, name: String(data[i][1] || rowEmail), email: rowEmail };
+  }
+  return { error: true, message: 'That email is not on the Reviewers list. Create an account first.' };
+}
+
+function signupReviewer_(payload) {
+  var first = String(payload.first || '').trim();
+  var last = String(payload.last || '').trim();
+  var email = String(payload.email || '').trim().toLowerCase();
+  var password = String(payload.password || '');
+  var confirmPassword = String(payload.confirm || '');
+  if (!first || !last || !email) return { error: true, message: 'Enter your name and email.' };
+  if (password.length < 8) return { error: true, message: 'Use at least 8 characters for the password.' };
+  if (password !== confirmPassword) return { error: true, message: 'Passwords do not match.' };
+  var sheet = reviewersSheet_();
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0] || '').trim().toLowerCase() === email) {
+      return { error: true, message: 'An account with that email already exists. Sign in instead.' };
+    }
+  }
+  sheet.appendRow([email, (first + ' ' + last).trim(), passwordHash_(password)]);
+  return loginReviewer_(email, password);
+}
+
+function scrapeStatusSheet_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Scrape Status');
+  if (!sheet) {
+    sheet = ss.insertSheet('Scrape Status');
+    sheet.appendRow(['phase', 'label', 'current_name', 'processed', 'total', 'found', 'not_found', 'skipped', 'errors', 'updated_at', 'message']);
+    sheet.appendRow(['idle', '', '', 0, 0, 0, 0, 0, 0, '', 'No scrape is running.']);
+  }
+  return sheet;
+}
+
+function readScrapeStatus_() {
+  var sheet = scrapeStatusSheet_();
+  var values = sheet.getRange(2, 1, 1, 11).getValues()[0];
+  return {
+    phase: values[0] || 'idle',
+    label: values[1] || '',
+    current_name: values[2] || '',
+    processed: values[3] || 0,
+    total: values[4] || 0,
+    found: values[5] || 0,
+    not_found: values[6] || 0,
+    skipped: values[7] || 0,
+    errors: values[8] || 0,
+    updated_at: values[9] || '',
+    message: values[10] || ''
+  };
+}
+
+function writeScrapeStatus_(payload) {
+  var sheet = scrapeStatusSheet_();
+  sheet.getRange(2, 1, 1, 11).setValues([[
+    payload.phase || 'running',
+    payload.label || '',
+    payload.current_name || '',
+    payload.processed || 0,
+    payload.total || 0,
+    payload.found || 0,
+    payload.not_found || 0,
+    payload.skipped || 0,
+    payload.errors || 0,
+    payload.updated_at || new Date().toISOString(),
+    payload.message || ''
+  ]]);
 }

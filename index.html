@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MatchGate Dashboard</title>
+    <title>MatchIQ Dashboard</title>
     <link rel="icon" type="image/png" href="logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -590,8 +590,8 @@
 
         .bottom-row {
             display: grid;
-            grid-template-columns: 3fr 1fr;
-            gap: 32px;
+            grid-template-columns: minmax(0, 1fr) 260px;
+            gap: 20px;
         }
 
         .table-card {
@@ -649,7 +649,8 @@
             border-bottom: 1px solid var(--border);
             vertical-align: middle;
         }
-        .cell-clip { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .cell-clip { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .col-title { max-width: 120px; width: 120px; }
         tbody tr { cursor: pointer; transition: background 0.15s; }
         tbody tr:hover { background: rgba(37, 99, 235, 0.04); }
 
@@ -760,7 +761,11 @@
         .page-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
 
         .side-panel { background: transparent; border-radius: 0; padding: 0; box-shadow: none; }
-        .side-title { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 12px; }
+        .side-title { font-size: 20px; font-weight: 700; color: var(--text-dark); margin: 0 0 20px; }
+        .side-panel .gateway-item { padding: 14px; gap: 10px; }
+        .side-panel .gateway-desc, .side-panel .qa-link { display: none; }
+        .side-panel .qa-foot { margin-top: 0; }
+        .side-panel .gateway-value { font-size: 18px; }
         .gateway-list { display: flex; flex-direction: column; gap: 12px; }
         .gateway-item {
             display: flex;
@@ -1299,7 +1304,7 @@
         .hero-avatar.auto, .hero-avatar.status-quick { background: #DBEAFE; color: #1D4ED8; }
         .hero-avatar.accept, .hero-avatar.status-quick { background: #DBEAFE; color: #1D4ED8; }
         .hero-avatar.status-deep { background: #FEF3C7; color: #B45309; }
-        .hero-avatar.reject, .hero-avatar.status-ignore { background: #FEE2E2; color: #B91C1C; }
+        .hero-avatar.reject, .hero-avatar.status-ignore, .hero-avatar.status-reject { background: #FEE2E2; color: #B91C1C; }
         .score-box, .info-box, .compare-side { background: #111; border: 1px solid var(--border); }
         .score-box .num { color: #fff; }
         .linkedin-full { background: var(--linkedin); color: #fff; }
@@ -1353,7 +1358,7 @@
         html.light .hero-avatar { background: #2563EB; color: #fff; }
         html.light .hero-avatar.auto { background: #D1FAE5; color: #047857; }
         html.light .hero-avatar.accept { background: #DBEAFE; color: #1D4ED8; }
-        html.light .hero-avatar.reject { background: #FEE2E2; color: #B91C1C; }
+        html.light .hero-avatar.reject, html.light .hero-avatar.status-ignore, html.light .hero-avatar.status-reject { background: #FEE2E2; color: #B91C1C; }
         html.light .rr-btn, html.light .save-btn { background: #2563EB; color: #fff; }
         html.light .bar-fill { background: #2563EB; }
         html.light .bar-track { background: #E8EEF6; }
@@ -1380,18 +1385,88 @@
         html.light .avatar.status-accept, html.light .avatar.status-quick { background: #DBEAFE; color: #1D4ED8; }
         html.light .avatar.status-deep, html.light .avatar.reviewed-flag { background: #FEF3C7; color: #B45309; }
         html.light .avatar.status-reject, html.light .avatar.reviewed-reject, html.light .avatar.status-ignore { background: #FEE2E2; color: #B91C1C; }
+        .login-gate {
+            position: fixed; inset: 0; z-index: 3000;
+            background: #0a0a0a; color: #fafafa;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .login-gate[hidden] { display: none; }
+        .login-card { width: 360px; max-width: 92vw; background: #171717; border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 28px; }
+        .login-card h1 { font-size: 22px; margin-bottom: 8px; }
+        .login-card p { color: #a3a3a3; font-size: 13px; margin-bottom: 16px; }
+        .login-card label { display: block; font-size: 12px; margin: 10px 0 6px; }
+        .login-card input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); background: #111; color: #fff; }
+        .login-card button[type="submit"] { margin-top: 16px; width: 100%; padding: 12px; border: none; border-radius: 12px; background: #f5f5f5; color: #111; font-weight: 700; cursor: pointer; }
+        .pw-wrap { position: relative; }
+        .pw-wrap input { padding-right: 42px; }
+        .pw-wrap input::-ms-reveal,
+        .pw-wrap input::-ms-clear { display: none; }
+        .pw-wrap input::-webkit-credentials-auto-fill-button,
+        .pw-wrap input::-webkit-contacts-auto-fill-button {
+            visibility: hidden;
+            display: none !important;
+            pointer-events: none;
+            width: 0;
+            height: 0;
+        }
+        .pw-eye { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: auto; margin: 0; padding: 4px 6px; background: transparent; color: #a3a3a3; border: none; cursor: pointer; }
+        .auth-switch { margin-top: 14px; font-size: 13px; color: #a3a3a3; }
+        .auth-switch button { width: auto; margin: 0; padding: 0; background: none; border: none; color: #93c5fd; font-weight: 600; cursor: pointer; }
+        .login-error { color: #fca5a5; min-height: 18px; margin-top: 10px; }
+        .scrape-banner { margin-bottom: 16px; padding: 14px 16px; border-radius: 12px; background: #172554; color: #dbeafe; border: 1px solid #1d4ed8; }
+        .scrape-banner.done { background: #052e16; color: #bbf7d0; border-color: #166534; }
+        .scrape-banner[hidden] { display: none; }
         html.light .stat-card, html.light .card, html.light .table-card, html.light .find-card, html.light .gateway-item, html.light .panel, html.light .modal, html.light .toast { background: #fff; }
 
     </style>
 </head>
 <body>
+    <div id="loginGate" class="login-gate">
+        <form id="signInForm" class="login-card" onsubmit="signIn(event)">
+            <h1>Sign in</h1>
+            <p>Use the email and password you signed up with.</p>
+            <label for="loginEmail">Email</label>
+            <input id="loginEmail" type="email" autocomplete="username" required>
+            <label for="loginPassword">Password</label>
+            <div class="pw-wrap">
+                <input id="loginPassword" type="password" autocomplete="current-password" required>
+                <button type="button" class="pw-eye" aria-label="Show password" onclick="togglePassword('loginPassword', this)"><i class="fas fa-eye"></i></button>
+            </div>
+            <button type="submit">Sign in</button>
+            <div id="loginError" class="login-error"></div>
+            <div class="auth-switch">New here? <button type="button" onclick="showSignUp()">Create an account</button></div>
+        </form>
+        <form id="signUpForm" class="login-card" hidden onsubmit="signUp(event)">
+            <h1>Create account</h1>
+            <p>Use this same email and password the next time you sign in.</p>
+            <label for="signupFirst">First name</label>
+            <input id="signupFirst" autocomplete="given-name" required>
+            <label for="signupLast">Last name</label>
+            <input id="signupLast" autocomplete="family-name" required>
+            <label for="signupEmail">Email</label>
+            <input id="signupEmail" type="email" autocomplete="username" required>
+            <label for="signupPassword">Create password</label>
+            <div class="pw-wrap">
+                <input id="signupPassword" type="password" autocomplete="new-password" required>
+                <button type="button" class="pw-eye" aria-label="Show password" onclick="togglePassword('signupPassword', this)"><i class="fas fa-eye"></i></button>
+            </div>
+            <label for="signupConfirm">Confirm password</label>
+            <div class="pw-wrap">
+                <input id="signupConfirm" type="password" autocomplete="new-password" required>
+                <button type="button" class="pw-eye" aria-label="Show password" onclick="togglePassword('signupConfirm', this)"><i class="fas fa-eye"></i></button>
+            </div>
+            <button type="submit">Sign up</button>
+            <div id="signupError" class="login-error"></div>
+            <div class="auth-switch">Already have an account? <button type="button" onclick="showSignIn()">Sign in</button></div>
+        </form>
+    </div>
     <div class="app">
         <aside class="sidebar">
             <div class="logo">
                 <div class="logo-lockup">
-                    <img class="logo-icon" src="logo.png" alt="MatchGate">
+                    <img class="logo-icon" src="logo.png" alt="MatchIQ">
                     <div class="logo-copy">
-                        <div class="logo-text">MatchGate</div>
+                        <div class="logo-text">MatchIQ</div>
                         <div class="logo-sub">Alumni</div>
                     </div>
                 </div>
@@ -1403,10 +1478,7 @@
             <div class="sidebar-nav">
                 <div class="nav-section">
                     <div class="nav-label">Navigation</div>
-                    <div class="nav-item active" data-nav="dashboard" onclick="filterBy('all')">
-                        <div class="nav-item-left"><i class="fas fa-table-columns"></i><span>Dashboard</span></div>
-                    </div>
-                    <div class="nav-item" data-nav="all" onclick="filterBy('all')">
+                    <div class="nav-item active" data-nav="all" onclick="filterBy('all')">
                         <div class="nav-item-left"><i class="fas fa-square-check"></i><span>All Matches</span></div>
                     </div>
                     <div class="nav-item" data-nav="quick" onclick="filterBy('quick')">
@@ -1418,7 +1490,7 @@
                         <span class="nav-badge" id="navDeepBadge">0</span>
                     </div>
                     <div class="nav-item" data-nav="ignore" onclick="filterBy('ignore')">
-                        <div class="nav-item-left"><i class="fas fa-eye-slash"></i><span>Ignore</span></div>
+                        <div class="nav-item-left"><i class="fas fa-circle-xmark"></i><span>Reject</span></div>
                         <span class="nav-badge" id="navIgnoreBadge">0</span>
                     </div>
                     <div class="nav-item" data-nav="reviewed" onclick="showReviewedOnly()">
@@ -1446,9 +1518,9 @@
         <div class="shell">
             <header class="header">
                 <div class="header-brand">
-                    <img class="header-mark" src="logo.png" alt="MatchGate">
+                    <img class="header-mark" src="logo.png" alt="MatchIQ">
                     <div>
-                        <div class="header-title">MatchGate</div>
+                        <div class="header-title">MatchIQ</div>
                         <div class="header-kicker">Alumni Operations</div>
                     </div>
                 </div>
@@ -1470,6 +1542,7 @@
             </header>
 
             <main class="main">
+                <div id="scrapeBanner" class="scrape-banner" hidden></div>
                 <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFile(event)">
 
                 <section class="hero">
@@ -1504,11 +1577,11 @@
                     </div>
                     <div class="stat-card" onclick="filterBy('ignore')">
                         <div class="stat-copy">
-                            <div class="stat-label">Ignore</div>
+                            <div class="stat-label">Reject</div>
                             <div class="stat-value" id="acceptStat">0</div>
-                            <div class="stat-trend">Set aside</div>
+                            <div class="stat-trend">Not a match</div>
                         </div>
-                        <div class="stat-icon blue"><i class="fas fa-eye-slash"></i></div>
+                        <div class="stat-icon blue"><i class="fas fa-circle-xmark"></i></div>
                     </div>
                     <div class="stat-card" onclick="filterBy('all')">
                         <div class="stat-copy">
@@ -1608,7 +1681,7 @@
                                 <option value="all">All statuses</option>
                                 <option value="quick review">Quick review</option>
                                 <option value="deep review">Deep review</option>
-                                <option value="ignore">Ignore</option>
+                                <option value="reject">Reject</option>
                                 <option value="pending">Pending</option>
                             </select>
                             <input type="number" id="classYearFrom" placeholder="Class from" min="1950" max="2030" oninput="handleSearch()" title="e.g. 1980 for C-suite cohort">
@@ -1625,7 +1698,7 @@
                         <div class="table-top">
                             <div>
                                 <div class="table-title">Alumni list</div>
-                                <div class="profile-sub" style="margin-top:4px">Sort by name, degree, title, company, city, or state. Select a row for full profile and RocketReach refresh</div>
+                                <!-- <div class="profile-sub" style="margin-top:4px">Sort by name, degree, title, company, city, or state. Select a row for full profile and RocketReach refresh</div> -->
                             </div>
                             <div style="display:flex;align-items:center;gap:10px">
                                 <span class="table-title"><small><span id="countLabel">373</span> visible</small></span>
@@ -1638,7 +1711,7 @@
                                         <th></th>
                                         <th class="sortable" data-sort="name" onclick="sortBy('name')">Name <i class="fas fa-sort"></i></th>
                                         <th class="sortable" data-sort="degree" onclick="sortBy('degree')">Degree <i class="fas fa-sort"></i></th>
-                                        <th class="sortable" data-sort="title" onclick="sortBy('title')">Title <i class="fas fa-sort"></i></th>
+                                        <th class="sortable col-title" data-sort="title" onclick="sortBy('title')">Title <i class="fas fa-sort"></i></th>
                                         <th class="sortable" data-sort="company" onclick="sortBy('company')">Company <i class="fas fa-sort"></i></th>
                                         <th class="sortable" data-sort="city" onclick="sortBy('city')">City <i class="fas fa-sort"></i></th>
                                         <th class="sortable" data-sort="state" onclick="sortBy('state')">State <i class="fas fa-sort"></i></th>
@@ -1688,10 +1761,10 @@
                             </div>
                             <div class="gateway-item" onclick="filterBy('ignore')">
                                 <div class="qa-top">
-                                <div class="gateway-icon red"><i class="fas fa-eye-slash"></i></div>
+                                <div class="gateway-icon red"><i class="fas fa-circle-xmark"></i></div>
                                 <div class="gateway-info">
-                                    <div class="gateway-name">Ignore</div>
-                                    <div class="gateway-desc">Set aside</div>
+                                    <div class="gateway-name">Reject</div>
+                                    <div class="gateway-desc">Not a match</div>
                                 </div>
                                 </div>
                                 <div class="qa-foot">
@@ -1699,21 +1772,6 @@
                                     <span class="qa-link">Review</span>
                                 </div>
                             </div>
-                            <div class="gateway-item" onclick="exportExcel()">
-                                <div class="qa-top">
-                                <div class="gateway-icon purple"><i class="fas fa-download"></i></div>
-                                <div class="gateway-info">
-                                    <div class="gateway-name">Export Results</div>
-                                    <div class="gateway-desc">Download current view</div>
-                                </div>
-                                </div>
-                                <div class="qa-foot">
-                                    <div class="gateway-value" style="color:#e5e5e5">CSV</div>
-                                    <span class="qa-link">Export</span>
-                                </div>
-                            </div>
-                            <div id="sideAuto" style="display:none"></div>
-                            <div id="sideMyReviews" style="display:none"></div>
                         </div>
                     </div>
 
@@ -1976,10 +2034,108 @@
                 localStorage.removeItem('miq_reviewer_name');
                 localStorage.removeItem('miq_reviewer_role');
                 localStorage.removeItem('miq_profile');
+                localStorage.removeItem('miq_session');
             } catch(e){}
             applyUserToUI();
-            openProfileModal();
-            toast('success', 'Logged out — sign in with your name to continue reviewing.');
+            document.getElementById('loginGate').hidden = false;
+            toast('success', 'Logged out.');
+        }
+
+        async function signIn(event) {
+            event.preventDefault();
+            await submitAuth('login', {
+                type: 'login',
+                email: document.getElementById('loginEmail').value,
+                password: document.getElementById('loginPassword').value
+            }, document.getElementById('loginError'));
+        }
+
+        async function signUp(event) {
+            event.preventDefault();
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirm').value;
+            const error = document.getElementById('signupError');
+            if (password !== confirmPassword) {
+                error.textContent = 'Passwords do not match.';
+                return;
+            }
+            await submitAuth('signup', {
+                type: 'signup',
+                first: document.getElementById('signupFirst').value,
+                last: document.getElementById('signupLast').value,
+                email: document.getElementById('signupEmail').value,
+                password: password,
+                confirm: confirmPassword
+            }, error);
+        }
+
+        async function submitAuth(kind, body, error) {
+            error.textContent = 'Checking...';
+            try {
+                const res = await fetch(REVIEWS_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                const signedName = data.name || [body.first, body.last].filter(Boolean).join(' ');
+                if (data.error || !data.token || !signedName) {
+                    error.textContent = data.message || 'Create account did not finish. Deploy the updated script, then try again.';
+                    return;
+                }
+                const parts = String(signedName).trim().split(/\s+/);
+                currentUser.name = signedName;
+                currentUser.first = body.first || parts[0] || '';
+                currentUser.last = body.last || parts.slice(1).join(' ');
+                currentUser.email = data.email || body.email || '';
+                try {
+                    localStorage.setItem('miq_session', data.token);
+                    localStorage.setItem('miq_reviewer_name', data.name);
+                    localStorage.setItem('miq_profile', JSON.stringify(currentUser));
+                } catch(e){}
+                document.getElementById('loginGate').hidden = true;
+                applyUserToUI();
+                error.textContent = '';
+            } catch (err) {
+                error.textContent = 'Could not reach the sign-in service. Deploy the updated script first.';
+            }
+        }
+
+        function showSignUp() {
+            document.getElementById('signInForm').hidden = true;
+            document.getElementById('signUpForm').hidden = false;
+        }
+
+        function showSignIn() {
+            document.getElementById('signUpForm').hidden = true;
+            document.getElementById('signInForm').hidden = false;
+        }
+
+        function togglePassword(id, button) {
+            const input = document.getElementById(id);
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            button.innerHTML = show ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+            button.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        }
+
+        async function refreshScrapeBanner() {
+            const banner = document.getElementById('scrapeBanner');
+            if (!banner) return;
+            try {
+                const res = await fetch(REVIEWS_API_URL + '?type=scrape_status');
+                const data = await res.json();
+                if (!data || !data.phase || data.phase === 'idle') {
+                    banner.hidden = true;
+                    return;
+                }
+                banner.hidden = false;
+                banner.classList.toggle('done', data.phase === 'done');
+                const title = data.phase === 'running' ? 'Scrape in progress' : 'Latest scrape finished';
+                banner.textContent = `${title}: ${data.label || ''} ${data.processed || 0}/${data.total || 0}. ${data.current_name || ''} Found ${data.found || 0}, not found ${data.not_found || 0}, skipped ${data.skipped || 0}, errors ${data.errors || 0}.`;
+            } catch (err) {
+                banner.hidden = true;
+            }
         }
 
         function showReviewSummary() {
@@ -2043,6 +2199,11 @@
             document.getElementById('emailTo').value = emailTo;
             try { applyTheme(localStorage.getItem('miq_theme') || 'dark'); } catch(e) { applyTheme('dark'); }
             applyUserToUI();
+            if (!localStorage.getItem('miq_session')) {
+                document.getElementById('loginGate').hidden = false;
+            } else {
+                document.getElementById('loginGate').hidden = true;
+            }
             await loadRecords();
             await loadReviews();
             applyReviewStamps();
@@ -2050,7 +2211,8 @@
             updateStats();
             applyFilter();
             renderCharts();
-            if (!currentUser.name) openProfileModal();
+            refreshScrapeBanner();
+            setInterval(refreshScrapeBanner, 8000);
         });
 
         function applyReviewStamps() {
@@ -2118,8 +2280,18 @@
             const category = reviewCategory(r);
             if (category === 'quick') return 'Quick review';
             if (category === 'deep') return 'Deep review';
-            if (category === 'ignore') return 'Ignore';
+            if (category === 'ignore') return 'Reject';
             return prettyStatus(r.action || '');
+        }
+
+        function avatarStatusClass(r) {
+            const category = reviewCategory(r);
+            if (category === 'quick') return 'status-quick';
+            if (category === 'deep') return 'status-deep';
+            if (category === 'ignore') return 'status-ignore';
+            const shown = prettyStatus(r.action || '').toLowerCase();
+            if (shown.includes('reject')) return 'status-reject';
+            return '';
         }
 
         function updateStats() {
@@ -2146,7 +2318,8 @@
             document.getElementById('sideAccept').textContent = deep;
             document.getElementById('sideReview').textContent = quick;
             document.getElementById('sideReject').textContent = ignore;
-            document.getElementById('sideMyReviews').textContent = Object.keys(reviews).length;
+            const mineCount = document.getElementById('sideMyReviews');
+            if (mineCount) mineCount.textContent = Object.keys(reviews).length;
             const high = DATA.filter(r => {
                 const c = (r.confidence || '').toUpperCase();
                 return c.includes('VERY HIGH') || c === 'HIGH';
@@ -2782,8 +2955,10 @@
                 if (!stateInRegion(loc.state, regionVal)) return false;
                 const stSel = document.getElementById('statusFilter');
                 if (stSel && stSel.value && stSel.value !== 'all') {
-                    const label = displayStatus(r).toLowerCase();
-                    if (label !== stSel.value.toLowerCase()) return false;
+                    const wanted = stSel.value.toLowerCase();
+                    if (wanted === 'reject') {
+                        if (reviewCategory(r) !== 'ignore') return false;
+                    } else if (displayStatus(r).toLowerCase() !== wanted) return false;
                 }
                 const classYear = getClassYear(r);
                 if (classFrom && (classYear === null || classYear < parseInt(classFrom, 10))) return false;
@@ -2815,18 +2990,11 @@
                 const rev = reviews[id];
                 const status = displayStatus(r);
                 const statusClass = statusKind(status);
-                const category = reviewCategory(r);
-                const avClass = category === 'quick'
-                    ? 'status-quick'
-                    : category === 'deep'
-                        ? 'status-deep'
-                        : category === 'ignore'
-                            ? 'status-ignore'
-                            : '';
+                const avClass = avatarStatusClass(r);
                 const scores = matchScores(r);
                 const score = Math.round(scores.combined);
                 const conf = prettyConfidence(scores.confidence||'N/A');
-                const statusLabel = prettyStatus(status);
+                const statusLabel = status;
                 const degree = getDegree(r) || '—';
                 const title = getTitle(r) || '—';
                 const company = getCompany(r) || '—';
@@ -2838,7 +3006,7 @@
                     <td class="check-cell" onclick="event.stopPropagation()"><input type="checkbox"></td>
                     <td><div class="profile-cell"><div class="avatar ${avClass}">${init}</div><div><div class="profile-name">${esc(name)}</div><div class="profile-sub">${year ? 'Class of ' + year : ''}</div></div></div></td>
                     <td>${esc(degree)}</td>
-                    <td class="cell-clip" title="${esc(title)}">${esc(title)}</td>
+                    <td class="cell-clip col-title" title="${esc(title)}">${esc(title)}</td>
                     <td class="cell-clip" title="${esc(company)}">${esc(company)}</td>
                     <td>${esc(loc.city || '—')}</td>
                     <td>${esc(loc.state || '—')}</td>
@@ -2867,10 +3035,11 @@
             const a = (status || '').toLowerCase();
             if (a.includes('quick')) return 'Quick review';
             if (a.includes('deep')) return 'Deep review';
-            if (a.includes('ignore')) return 'Ignore';
+            if (a.includes('ignore')) return 'Reject';
             if (a.includes('auto')) return 'Auto-accepted';
             if (a === 'accept' || a.includes('accepted')) return 'Accepted';
-            if (a.includes('reject')) return 'Rejected';
+            if (a.includes('rejected')) return 'Rejected';
+            if (a === 'reject') return 'Reject';
             return 'Pending';
         }
         function prettyConfidence(conf) {
@@ -2915,7 +3084,7 @@
 
             document.getElementById('panelBody').innerHTML = `
                 <div class="profile-hero">
-                    <div class="hero-avatar ${reviewCategory(r) ? 'status-' + reviewCategory(r) : ''}">${getInit(name)}</div>
+                    <div class="hero-avatar ${avatarStatusClass(r)}">${getInit(name)}</div>
                     <div>
                         <h3>${name}</h3>
                         <p>${title}${title && company ? ' · ' : ''}${company || ''}</p>
@@ -2984,7 +3153,7 @@
                         <div class="review-btns">
                             <button class="review-btn accept ${reviewCategory(r)==='quick'?'selected':''}" onclick="setAction('${id}','quick',this)"><i class="fas fa-bolt"></i> Quick review</button>
                             <button class="review-btn flag ${reviewCategory(r)==='deep'?'selected':''}" onclick="setAction('${id}','deep',this)"><i class="fab fa-linkedin"></i> Deep review</button>
-                            <button class="review-btn reject ${reviewCategory(r)==='ignore'?'selected':''}" onclick="setAction('${id}','ignore',this)"><i class="fas fa-eye-slash"></i> Ignore</button>
+                            <button class="review-btn reject ${reviewCategory(r)==='ignore'?'selected':''}" onclick="setAction('${id}','ignore',this)"><i class="fas fa-circle-xmark"></i> Reject</button>
                         </div>
                         <textarea class="review-comment" id="reviewComment" placeholder="Add a review note for your team...">${rev.comment||''}</textarea>
                         <div class="email-row">
@@ -3020,7 +3189,7 @@
             const comment = document.getElementById('reviewComment').value;
             const send = document.getElementById('sendEmail').checked;
 
-            if(!window.currentAction) { toast('error','Please select Quick review, Deep review, or Ignore'); return; }
+            if(!window.currentAction) { toast('error','Please select Quick review, Deep review, or Reject'); return; }
 
             let reviewer = (currentUser.name || '').trim();
             if (!reviewer) {
@@ -3079,8 +3248,8 @@
             }
 
             if(send && emailTo) {
-                const subj = encodeURIComponent(`[MatchGate] ${name} - ${window.currentAction.toUpperCase()}`);
-                const body = encodeURIComponent(`MatchGate Review Alert\n\nProfile: ${name}\nAction: ${window.currentAction.toUpperCase()}\nConfidence: ${conf}\nScore: ${score}%\nReviewed by: ${reviewer}\n\nComment:\n${comment||'No comment'}\n\n---\nReviewed: ${new Date().toLocaleString()}`);
+                const subj = encodeURIComponent(`[MatchIQ] ${name} - ${window.currentAction.toUpperCase()}`);
+                const body = encodeURIComponent(`MatchIQ Review Alert\n\nProfile: ${name}\nAction: ${window.currentAction.toUpperCase()}\nConfidence: ${conf}\nScore: ${score}%\nReviewed by: ${reviewer}\n\nComment:\n${comment||'No comment'}\n\n---\nReviewed: ${new Date().toLocaleString()}`);
                 window.open(`mailto:${emailTo}?subject=${subj}&body=${body}`,'_blank');
             }
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MatchGate Dashboard</title>
+    <title>MatchIQ Dashboard</title>
     <link rel="icon" type="image/png" href="logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -1363,9 +1363,9 @@
         <aside class="sidebar">
             <div class="logo">
                 <div class="logo-lockup">
-                    <img class="logo-icon" src="logo.png" alt="MatchGate">
+                    <img class="logo-icon" src="logo.png" alt="MatchIQ">
                     <div class="logo-copy">
-                        <div class="logo-text">MatchGate</div>
+                        <div class="logo-text">MatchIQ</div>
                         <div class="logo-sub">Alumni</div>
                     </div>
                 </div>
@@ -1412,9 +1412,9 @@
         <div class="shell">
             <header class="header">
                 <div class="header-brand">
-                    <img class="header-mark" src="logo.png" alt="MatchGate">
+                    <img class="header-mark" src="logo.png" alt="MatchIQ">
                     <div>
-                        <div class="header-title">MatchGate</div>
+                        <div class="header-title">MatchIQ</div>
                         <div class="header-kicker">Alumni Operations</div>
                     </div>
                 </div>
@@ -2493,8 +2493,8 @@
             try { localStorage.setItem('miq_reviews', JSON.stringify(reviews)); } catch(e){}
 
             if(send && emailTo) {
-                const subj = encodeURIComponent(`[MatchGate] ${name} - ${window.currentAction.toUpperCase()}`);
-                const body = encodeURIComponent(`MatchGate Review Alert\n\nProfile: ${name}\nAction: ${window.currentAction.toUpperCase()}\nConfidence: ${conf}\nScore: ${score}%\n\nComment:\n${comment||'No comment'}\n\n---\nReviewed: ${new Date().toLocaleString()}`);
+                const subj = encodeURIComponent(`[MatchIQ] ${name} - ${window.currentAction.toUpperCase()}`);
+                const body = encodeURIComponent(`MatchIQ Review Alert\n\nProfile: ${name}\nAction: ${window.currentAction.toUpperCase()}\nConfidence: ${conf}\nScore: ${score}%\n\nComment:\n${comment||'No comment'}\n\n---\nReviewed: ${new Date().toLocaleString()}`);
                 window.open(`mailto:${emailTo}?subject=${subj}&body=${body}`,'_blank');
             }
 
