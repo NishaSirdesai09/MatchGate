@@ -657,7 +657,9 @@
         .avatar {
             width: 40px;
             height: 40px;
-            border-radius: 12px;
+            min-width: 40px;
+            flex-shrink: 0;
+            border-radius: 50%;
             background: rgba(37, 99, 235, 0.10);
             display: flex;
             align-items: center;
@@ -666,10 +668,10 @@
             font-weight: 700;
             font-size: 11px;
         }
-        .avatar.reviewed-accept, .avatar.status-auto { background: #D1FAE5; color: #047857; }
-        .avatar.status-accept { background: #DBEAFE; color: #1D4ED8; }
-        .avatar.reviewed-reject, .avatar.status-reject { background: #FEE2E2; color: #B91C1C; }
-        .avatar.reviewed-flag { background: #FEF3C7; color: #B45309; }
+        .avatar.reviewed-accept, .avatar.status-auto, .avatar.status-quick { background: #DBEAFE; color: #1D4ED8; }
+        .avatar.status-accept, .avatar.status-quick { background: #DBEAFE; color: #1D4ED8; }
+        .avatar.status-deep, .avatar.reviewed-flag { background: #FEF3C7; color: #B45309; }
+        .avatar.reviewed-reject, .avatar.status-reject, .avatar.status-ignore { background: #FEE2E2; color: #B91C1C; }
         .profile-name { font-weight: 600; color: var(--text-dark); font-size: 13px; }
         .profile-sub { font-size: 12px; color: var(--text-medium); }
 
@@ -913,7 +915,8 @@
         .hero-avatar {
             width: 64px;
             height: 64px;
-            border-radius: 16px;
+            min-width: 64px;
+            border-radius: 50%;
             background: var(--primary);
             display: flex;
             align-items: center;
@@ -1263,9 +1266,11 @@
         .avatar {
             background: #262626;
             color: #f5f5f5;
-            border-radius: 999px;
+            border-radius: 50%;
             width: 40px;
             height: 40px;
+            min-width: 40px;
+            flex-shrink: 0;
         }
         .check-cell { width: 36px; }
         .check-cell input { accent-color: #fff; width: 14px; height: 14px; }
@@ -1291,9 +1296,10 @@
         .close-btn { background: transparent; color: var(--text-medium); border-color: var(--border); border-radius: 999px; }
         .close-btn:hover { background: #262626; color: #fff; }
         .profile-hero { background: #1f1f1f; }
-        .hero-avatar.auto { background: #D1FAE5; color: #047857; }
-        .hero-avatar.accept { background: #DBEAFE; color: #1D4ED8; }
-        .hero-avatar.reject { background: #FEE2E2; color: #B91C1C; }
+        .hero-avatar.auto, .hero-avatar.status-quick { background: #DBEAFE; color: #1D4ED8; }
+        .hero-avatar.accept, .hero-avatar.status-quick { background: #DBEAFE; color: #1D4ED8; }
+        .hero-avatar.status-deep { background: #FEF3C7; color: #B45309; }
+        .hero-avatar.reject, .hero-avatar.status-ignore { background: #FEE2E2; color: #B91C1C; }
         .score-box, .info-box, .compare-side { background: #111; border: 1px solid var(--border); }
         .score-box .num { color: #fff; }
         .linkedin-full { background: var(--linkedin); color: #fff; }
@@ -1369,11 +1375,11 @@
         html.light .network-copy h3, html.light .network-copy .network-total, html.light .network-copy p { text-shadow: 0 1px 10px rgba(255,255,255,0.9); }
         html.light .pw-link { color: #2563EB; }
         html.light .qa-link { color: #2563EB; }
-        html.light .avatar { background: #E8EEF6; color: #2563EB; }
-        html.light .avatar.status-auto, html.light .avatar.reviewed-accept { background: #D1FAE5; color: #047857; }
-        html.light .avatar.status-accept { background: #DBEAFE; color: #1D4ED8; }
-        html.light .avatar.status-reject, html.light .avatar.reviewed-reject { background: #FEE2E2; color: #B91C1C; }
-        html.light .avatar.reviewed-flag { background: #FEF3C7; color: #B45309; }
+        html.light .avatar { background: #E8EEF6; color: #2563EB; border-radius: 50%; }
+        html.light .avatar.status-auto, html.light .avatar.reviewed-accept, html.light .avatar.status-quick { background: #DBEAFE; color: #1D4ED8; }
+        html.light .avatar.status-accept, html.light .avatar.status-quick { background: #DBEAFE; color: #1D4ED8; }
+        html.light .avatar.status-deep, html.light .avatar.reviewed-flag { background: #FEF3C7; color: #B45309; }
+        html.light .avatar.status-reject, html.light .avatar.reviewed-reject, html.light .avatar.status-ignore { background: #FEE2E2; color: #B91C1C; }
         html.light .stat-card, html.light .card, html.light .table-card, html.light .find-card, html.light .gateway-item, html.light .panel, html.light .modal, html.light .toast { background: #fff; }
 
     </style>
@@ -1403,9 +1409,17 @@
                     <div class="nav-item" data-nav="all" onclick="filterBy('all')">
                         <div class="nav-item-left"><i class="fas fa-square-check"></i><span>All Matches</span></div>
                     </div>
-                    <div class="nav-item" data-nav="review" onclick="filterBy('review')">
-                        <div class="nav-item-left"><i class="fas fa-clock"></i><span>Pending Review</span></div>
-                        <span class="nav-badge" id="navReviewBadge">46</span>
+                    <div class="nav-item" data-nav="quick" onclick="filterBy('quick')">
+                        <div class="nav-item-left"><i class="fas fa-bolt"></i><span>Quick review</span></div>
+                        <span class="nav-badge" id="navQuickBadge">0</span>
+                    </div>
+                    <div class="nav-item" data-nav="deep" onclick="filterBy('deep')">
+                        <div class="nav-item-left"><i class="fab fa-linkedin"></i><span>Deep review</span></div>
+                        <span class="nav-badge" id="navDeepBadge">0</span>
+                    </div>
+                    <div class="nav-item" data-nav="ignore" onclick="filterBy('ignore')">
+                        <div class="nav-item-left"><i class="fas fa-eye-slash"></i><span>Ignore</span></div>
+                        <span class="nav-badge" id="navIgnoreBadge">0</span>
                     </div>
                     <div class="nav-item" data-nav="reviewed" onclick="showReviewedOnly()">
                         <div class="nav-item-left"><i class="fas fa-eye"></i><span>My Reviews</span></div>
@@ -1472,37 +1486,37 @@
 
 
                 <div class="stats-grid">
-                    <div class="stat-card" onclick="filterBy('review')">
+                    <div class="stat-card" onclick="filterBy('quick')">
                         <div class="stat-copy">
-                            <div class="stat-label">Pending Review</div>
-                            <div class="stat-value" id="reviewStat">46</div>
-                            <div class="stat-trend up">↑ 12% vs last period</div>
+                            <div class="stat-label">Quick review</div>
+                            <div class="stat-value" id="reviewStat">0</div>
+                            <div class="stat-trend">Close name match</div>
                         </div>
-                        <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+                        <div class="stat-icon orange"><i class="fas fa-bolt"></i></div>
                     </div>
-                    <div class="stat-card" onclick="filterBy('auto-accept')">
+                    <div class="stat-card" onclick="filterBy('deep')">
                         <div class="stat-copy">
-                            <div class="stat-label">Auto-Accepted</div>
-                            <div class="stat-value" id="autoStat">130</div>
-                            <div class="stat-trend up">↑ 8% vs last period</div>
+                            <div class="stat-label">Deep review</div>
+                            <div class="stat-value" id="autoStat">0</div>
+                            <div class="stat-trend">LinkedIn or web</div>
                         </div>
-                        <div class="stat-icon green"><i class="fas fa-check"></i></div>
+                        <div class="stat-icon green"><i class="fab fa-linkedin"></i></div>
                     </div>
-                    <div class="stat-card" onclick="filterBy('accept')">
+                    <div class="stat-card" onclick="filterBy('ignore')">
                         <div class="stat-copy">
-                            <div class="stat-label">Accepted</div>
-                            <div class="stat-value" id="acceptStat">102</div>
-                            <div class="stat-trend down">↘ 3% vs last period</div>
+                            <div class="stat-label">Ignore</div>
+                            <div class="stat-value" id="acceptStat">0</div>
+                            <div class="stat-trend">Set aside</div>
                         </div>
-                        <div class="stat-icon blue"><i class="fas fa-handshake"></i></div>
+                        <div class="stat-icon blue"><i class="fas fa-eye-slash"></i></div>
                     </div>
-                    <div class="stat-card" onclick="filterBy('reject')">
+                    <div class="stat-card" onclick="filterBy('all')">
                         <div class="stat-copy">
-                            <div class="stat-label">Rejected</div>
-                            <div class="stat-value" id="rejectStat">95</div>
-                            <div class="stat-trend down">↘ 1% vs last period</div>
+                            <div class="stat-label">Not sorted</div>
+                            <div class="stat-value" id="rejectStat">0</div>
+                            <div class="stat-trend">No list yet</div>
                         </div>
-                        <div class="stat-icon red"><i class="fas fa-circle-xmark"></i></div>
+                        <div class="stat-icon red"><i class="fas fa-inbox"></i></div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-copy">
@@ -1592,10 +1606,10 @@
                             </select>
                             <select id="statusFilter" onchange="handleSearch()" class="find-select">
                                 <option value="all">All statuses</option>
-                                <option value="auto-accepted">Auto-accepted</option>
-                                <option value="accepted">Accepted</option>
+                                <option value="quick review">Quick review</option>
+                                <option value="deep review">Deep review</option>
+                                <option value="ignore">Ignore</option>
                                 <option value="pending">Pending</option>
-                                <option value="rejected">Rejected</option>
                             </select>
                             <input type="number" id="classYearFrom" placeholder="Class from" min="1950" max="2030" oninput="handleSearch()" title="e.g. 1980 for C-suite cohort">
                             <input type="number" id="classYearTo" placeholder="Class to" min="1950" max="2030" oninput="handleSearch()" title="e.g. 1999 for C-suite cohort">
@@ -1646,42 +1660,42 @@
                     <div class="side-panel">
                         <div class="side-title">Quick Actions</div>
                         <div class="gateway-list">
-                            <div class="gateway-item" onclick="filterBy('review')">
+                            <div class="gateway-item" onclick="filterBy('quick')">
                                 <div class="qa-top">
-                                <div class="gateway-icon yellow"><i class="fas fa-clock"></i></div>
+                                <div class="gateway-icon yellow"><i class="fas fa-bolt"></i></div>
                                 <div class="gateway-info">
-                                    <div class="gateway-name">Pending Review</div>
-                                    <div class="gateway-desc">Awaiting your decision</div>
+                                    <div class="gateway-name">Quick review</div>
+                                    <div class="gateway-desc">Close name match</div>
                                 </div>
                                 </div>
                                 <div class="qa-foot">
-                                    <div class="gateway-value" style="color:#fb923c" id="sideReview">46</div>
+                                    <div class="gateway-value" style="color:#fb923c" id="sideReview">0</div>
                                     <span class="qa-link">Review next</span>
                                 </div>
                             </div>
-                            <div class="gateway-item" onclick="filterBy('accept')">
+                            <div class="gateway-item" onclick="filterBy('deep')">
                                 <div class="qa-top">
-                                <div class="gateway-icon green"><i class="fas fa-circle-check"></i></div>
+                                <div class="gateway-icon green"><i class="fab fa-linkedin"></i></div>
                                 <div class="gateway-info">
-                                    <div class="gateway-name">Accepted</div>
-                                    <div class="gateway-desc">High confidence matches</div>
+                                    <div class="gateway-name">Deep review</div>
+                                    <div class="gateway-desc">Check LinkedIn or the web</div>
                                 </div>
                                 </div>
                                 <div class="qa-foot">
-                                    <div class="gateway-value plus" id="sideAccept">78</div>
+                                    <div class="gateway-value plus" id="sideAccept">0</div>
                                     <span class="qa-link">View all</span>
                                 </div>
                             </div>
-                            <div class="gateway-item" onclick="filterBy('reject')">
+                            <div class="gateway-item" onclick="filterBy('ignore')">
                                 <div class="qa-top">
-                                <div class="gateway-icon red"><i class="fas fa-circle-xmark"></i></div>
+                                <div class="gateway-icon red"><i class="fas fa-eye-slash"></i></div>
                                 <div class="gateway-info">
-                                    <div class="gateway-name">Rejected</div>
-                                    <div class="gateway-desc">Low confidence matches</div>
+                                    <div class="gateway-name">Ignore</div>
+                                    <div class="gateway-desc">Set aside</div>
                                 </div>
                                 </div>
                                 <div class="qa-foot">
-                                    <div class="gateway-value minus" id="sideReject">95</div>
+                                    <div class="gateway-value minus" id="sideReject">0</div>
                                     <span class="qa-link">Review</span>
                                 </div>
                             </div>
@@ -2031,6 +2045,7 @@
             applyUserToUI();
             await loadRecords();
             await loadReviews();
+            applyReviewStamps();
             populateFilterDropdowns();
             updateStats();
             applyFilter();
@@ -2038,30 +2053,99 @@
             if (!currentUser.name) openProfileModal();
         });
 
+        function applyReviewStamps() {
+            DATA.forEach(r => {
+                const saved = reviews[r.rr_index] || reviews[String(r.rr_index)];
+                if (!saved) return;
+                if (saved.previous_timestamp) r.last_updated = saved.previous_timestamp;
+                if (saved.previous_reviewer) r.last_updated_by = saved.previous_reviewer;
+                if (saved.timestamp) r.updated_at = saved.timestamp;
+                if (saved.reviewer) r.updated_by = saved.reviewer;
+                if (normalizeQueue(saved.action)) r.action = saved.action;
+            });
+        }
+
+        function normalizeQueue(value) {
+            const v = String(value || '').toLowerCase().replace(/[\s-]+/g, '_');
+            if (v === 'quick' || v === 'quick_review') return 'quick';
+            if (v === 'deep' || v === 'deep_review' || v === 'manual' || v === 'manual_review') return 'deep';
+            if (v === 'ignore') return 'ignore';
+            return '';
+        }
+
+        function reviewCategory(r) {
+            const id = r.rr_index || DATA.indexOf(r);
+            const saved = reviews[id] && reviews[id].action;
+            const fromReview = normalizeQueue(saved);
+            if (fromReview) return fromReview;
+            const fromAction = normalizeQueue(r.action);
+            if (fromAction) return fromAction;
+            const fromQueue = normalizeQueue(r.review_queue);
+            if (fromQueue) return fromQueue;
+            const score = Number(r.name_ensemble_score || 0);
+            if (score >= 92) return 'quick';
+            return '';
+        }
+
+        function formatStamp(whenRaw, who) {
+            if (!whenRaw && !who) return 'Not saved yet';
+            let whenText = 'time not recorded';
+            if (whenRaw) {
+                const when = new Date(whenRaw);
+                whenText = isNaN(when.getTime()) ? String(whenRaw) : when.toLocaleString();
+            }
+            return `${whenText} by ${who || 'unknown'}`;
+        }
+
+        function reviewFor(id) {
+            return reviews[id] || reviews[String(id)] || {};
+        }
+
+        function lastUpdatedStamp(r, id) {
+            const saved = reviewFor(id);
+            const when = saved.previous_timestamp || r.last_updated || '';
+            const who = saved.previous_reviewer || r.last_updated_by || '';
+            if (!when && !who) return formatStamp(saved.timestamp || r.updated_at, saved.reviewer || r.updated_by);
+            return formatStamp(when, who);
+        }
+
+        function updatedByStamp(r, id) {
+            const saved = reviewFor(id);
+            return formatStamp(saved.timestamp || r.updated_at, saved.reviewer || r.updated_by);
+        }
+
+        function displayStatus(r) {
+            const category = reviewCategory(r);
+            if (category === 'quick') return 'Quick review';
+            if (category === 'deep') return 'Deep review';
+            if (category === 'ignore') return 'Ignore';
+            return prettyStatus(r.action || '');
+        }
+
         function updateStats() {
             const t = DATA.length;
-            let auto=0, acc=0, rev=0, rej=0;
+            let quick = 0, deep = 0, ignore = 0, unsorted = 0;
             DATA.forEach(r => {
-                const a = (r.action||'').toLowerCase();
-                if(a.includes('auto')) auto++;
-                else if(a==='accept') acc++;
-                else if(a.includes('review')||a.includes('manual')) rev++;
-                else if(a.includes('reject')) rej++;
+                const category = reviewCategory(r);
+                if (category === 'quick') quick++;
+                else if (category === 'deep') deep++;
+                else if (category === 'ignore') ignore++;
+                else unsorted++;
             });
-            const p = n => t>0 ? Math.round(n/t*100) : 0;
 
             document.getElementById('totalMain').textContent = t;
             const ot = document.getElementById('overviewTotal');
             if (ot) ot.textContent = t;
-            document.getElementById('autoStat').textContent = auto;
-            document.getElementById('acceptStat').textContent = acc;
-            document.getElementById('reviewStat').textContent = rev;
-            document.getElementById('rejectStat').textContent = rej;
+            document.getElementById('reviewStat').textContent = quick;
+            document.getElementById('autoStat').textContent = deep;
+            document.getElementById('acceptStat').textContent = ignore;
+            document.getElementById('rejectStat').textContent = unsorted;
 
-            document.getElementById('sideAuto').textContent = auto;
-            document.getElementById('sideAccept').textContent = acc;
-            document.getElementById('sideReview').textContent = rev;
-            document.getElementById('sideReject').textContent = rej;
+            const sideAuto = document.getElementById('sideAuto');
+            if (sideAuto) sideAuto.textContent = deep;
+            document.getElementById('sideAccept').textContent = deep;
+            document.getElementById('sideReview').textContent = quick;
+            document.getElementById('sideReject').textContent = ignore;
             document.getElementById('sideMyReviews').textContent = Object.keys(reviews).length;
             const high = DATA.filter(r => {
                 const c = (r.confidence || '').toUpperCase();
@@ -2088,9 +2172,13 @@
             }
 
             const q = document.getElementById('queueCount');
-            if (q) q.textContent = rev;
-            const badge = document.getElementById('navReviewBadge');
-            if (badge) badge.textContent = rev;
+            if (q) q.textContent = quick + deep;
+            const quickBadge = document.getElementById('navQuickBadge');
+            const deepBadge = document.getElementById('navDeepBadge');
+            const ignoreBadge = document.getElementById('navIgnoreBadge');
+            if (quickBadge) quickBadge.textContent = quick;
+            if (deepBadge) deepBadge.textContent = deep;
+            if (ignoreBadge) ignoreBadge.textContent = ignore;
 
 
             let dmsb = 0;
@@ -2153,7 +2241,8 @@
         function filterBy(f) {
             filter = f;
             page = 1;
-            setNavActive(f === 'review' ? 'review' : f === 'reviewed' ? 'reviewed' : f === 'all' ? 'all' : 'dashboard');
+            const nav = (f === 'all' || f === 'quick' || f === 'deep' || f === 'ignore' || f === 'reviewed') ? f : 'dashboard';
+            setNavActive(nav);
             applyFilter();
         }
 
@@ -2167,6 +2256,64 @@
         function handleSearch() {
             page = 1;
             applyFilter();
+        }
+
+        function storedNumber(value) {
+            if (value === undefined || value === null || String(value).trim() === '') return null;
+            const number = Number(value);
+            return Number.isFinite(number) ? number : null;
+        }
+
+        function normalizedText(value) {
+            return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+        }
+
+        function textSimilarity(left, right) {
+            const a = normalizedText(left);
+            const b = normalizedText(right);
+            if (!a || !b) return 0;
+            if (a === b) return 100;
+            const rows = Array.from({ length: b.length + 1 }, (_, i) => [i]);
+            for (let j = 0; j <= a.length; j++) rows[0][j] = j;
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    const cost = b[i - 1] === a[j - 1] ? 0 : 1;
+                    rows[i][j] = Math.min(rows[i - 1][j] + 1, rows[i][j - 1] + 1, rows[i - 1][j - 1] + cost);
+                }
+            }
+            const distance = rows[b.length][a.length];
+            return Math.round(100 * (1 - distance / Math.max(a.length, b.length)));
+        }
+
+        function locationSimilarity(r) {
+            const loc = normalizedText(r.rr_location);
+            const city = normalizedText(r['legacy_Person Account: Home City']);
+            const state = normalizedText(r['legacy_Person Account: Home State/Province']);
+            if (!loc) return 0;
+            const stateHit = state && (loc.includes(state) || (state.length === 2 && loc.includes(state)));
+            const cityHit = city && loc.includes(city);
+            if (cityHit && stateHit) return 100;
+            if (cityHit || stateHit) return 70;
+            return textSimilarity(loc, [city, state].filter(Boolean).join(' '));
+        }
+
+        function confidenceLabel(score) {
+            if (score >= 90) return 'VERY HIGH';
+            if (score >= 75) return 'HIGH';
+            if (score >= 60) return 'MEDIUM-HIGH';
+            if (score >= 45) return 'MEDIUM-LOW';
+            return 'LOW';
+        }
+
+        function matchScores(r) {
+            const storedName = storedNumber(r.name_ensemble_score);
+            const storedLocation = storedNumber(r.location_score);
+            const storedCombined = storedNumber(r.combined_score);
+            const name = storedName !== null ? storedName : textSimilarity(r.rr_name, r['legacy_Account Name']);
+            const location = storedLocation !== null ? storedLocation : locationSimilarity(r);
+            const combined = storedCombined !== null ? storedCombined : Math.round((name + location) / 2);
+            const confidence = String(r.confidence || '').trim() || confidenceLabel(combined);
+            return { name, location, combined, confidence };
         }
 
         function getDegree(r) {
@@ -2507,12 +2654,12 @@
                 };
 
                 resultDiv.innerHTML = `
-                    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;">
-                        <div style="font-weight:600;margin-bottom:6px;">Fresh from RocketReach:</div>
+                    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;color:#14532d;">
+                        <div style="font-weight:600;margin-bottom:6px;color:#14532d;">Fresh from RocketReach:</div>
                         <div><strong>Title:</strong> ${escapeHtml(title)}</div>
                         <div><strong>Company:</strong> ${escapeHtml(employer)}</div>
                         <div><strong>Location:</strong> ${escapeHtml(location)}</div>
-                        ${linkedin ? `<div><strong>LinkedIn:</strong> <a href="${escapeHtml(linkedin)}" target="_blank">${escapeHtml(linkedin)}</a></div>` : ''}
+                        ${linkedin ? `<div><strong>LinkedIn:</strong> <a href="${escapeHtml(linkedin)}" target="_blank" style="color:#1d4ed8;">${escapeHtml(linkedin)}</a></div>` : ''}
                         ${formatEmailValidationHtml(validation)}
                         <button onclick="saveRocketReachUpdate('${id}')" style="margin-top:10px;padding:6px 14px;border-radius:6px;background:#16a34a;color:white;border:none;cursor:pointer;">
                             <i class="fas fa-save"></i> Save this update to Records
@@ -2546,7 +2693,10 @@
                         rr_location: fresh.location,
                         rr_linkedin_url: fresh.linkedin,
                         rr_email: fresh.email || '',
-                        rr_email_status: fresh.emailStatus || ''
+                        rr_email_status: fresh.emailStatus || '',
+                        last_updated: new Date().toISOString(),
+                        updated_by: (currentUser.name || '').trim(),
+                        name: (DATA.find(item => String(item.rr_index) === String(id)) || {}).rr_name || ''
                     })
                 });
                 statusSpan.textContent = '✓ Saved to Records sheet';
@@ -2595,22 +2745,30 @@
                     const rev = reviews[id];
                     if(!rev) return false;
                     if (currentUser.name && rev.reviewer && rev.reviewer !== currentUser.name) return false;
-                } else if(filter!=='all') {
-                    const a = (r.action||'').toLowerCase();
-                    if(filter==='auto-accept' && !a.includes('auto')) return false;
-                    if(filter==='accept' && a!=='accept') return false;
-                    if(filter==='review' && !a.includes('review') && !a.includes('manual')) return false;
-                    if(filter==='reject' && !a.includes('reject')) return false;
+                } else if(filter==='quick' || filter==='deep' || filter==='ignore') {
+                    if (reviewCategory(r) !== filter) return false;
                 }
                 const loc = parseLocation(r);
                 const title = getTitle(r);
                 const company = getCompany(r);
                 const degree = getDegree(r);
                 if(q) {
-                    const n = (r.rr_name||'').toLowerCase();
-                    const l = (r['legacy_Account Name']||'').toLowerCase();
-                    const hay = [n, l, company.toLowerCase(), degree.toLowerCase(), title.toLowerCase(), loc.city.toLowerCase(), loc.state.toLowerCase(), (r.rr_location||'').toLowerCase()].join(' ');
-                    if(!hay.includes(q)) return false;
+                    const hay = normalizedText([
+                        r.rr_name,
+                        r.rr_first_name,
+                        r.rr_last_name,
+                        r['legacy_Account Name'],
+                        r['legacy_Person Account: First Name (Advancement)'],
+                        r['legacy_Person Account: Last Name (Advancement)'],
+                        company,
+                        degree,
+                        title,
+                        loc.city,
+                        loc.state,
+                        r.rr_location
+                    ].join(' '));
+                    const words = normalizedText(q).split(' ').filter(Boolean);
+                    if(!words.every(word => hay.includes(word))) return false;
                 }
                 if (degreeVal && degree !== degreeVal) return false;
                 const citySel = document.getElementById('locationFilter');
@@ -2624,7 +2782,7 @@
                 if (!stateInRegion(loc.state, regionVal)) return false;
                 const stSel = document.getElementById('statusFilter');
                 if (stSel && stSel.value && stSel.value !== 'all') {
-                    const label = prettyStatus(r.action || '').toLowerCase();
+                    const label = displayStatus(r).toLowerCase();
                     if (label !== stSel.value.toLowerCase()) return false;
                 }
                 const classYear = getClassYear(r);
@@ -2655,19 +2813,19 @@
                 const name = r.rr_name||'Unknown';
                 const init = getInit(name);
                 const rev = reviews[id];
-                const status = r.action||'Pending';
+                const status = displayStatus(r);
                 const statusClass = statusKind(status);
-                const avClass = rev
-                    ? `reviewed-${rev.action}`
-                    : statusClass === 'auto'
-                        ? 'status-auto'
-                    : statusClass === 'accept'
-                        ? 'status-accept'
-                        : statusClass === 'reject'
-                            ? 'status-reject'
+                const category = reviewCategory(r);
+                const avClass = category === 'quick'
+                    ? 'status-quick'
+                    : category === 'deep'
+                        ? 'status-deep'
+                        : category === 'ignore'
+                            ? 'status-ignore'
                             : '';
-                const score = Math.round(r.combined_score||0);
-                const conf = prettyConfidence(r.confidence||'N/A');
+                const scores = matchScores(r);
+                const score = Math.round(scores.combined);
+                const conf = prettyConfidence(scores.confidence||'N/A');
                 const statusLabel = prettyStatus(status);
                 const degree = getDegree(r) || '—';
                 const title = getTitle(r) || '—';
@@ -2697,16 +2855,22 @@
 
         function statusKind(status) {
             const a = (status || '').toLowerCase();
+            if (a.includes('ignore')) return 'reject';
+            if (a.includes('deep')) return 'review';
+            if (a.includes('quick')) return 'accept';
             if (a.includes('reject')) return 'reject';
             if (a.includes('auto')) return 'auto';
             if (a.includes('accept')) return 'accept';
             return 'review';
         }
         function prettyStatus(status) {
-            const k = statusKind(status);
-            if (k === 'auto') return 'Auto-accepted';
-            if (k === 'accept') return 'Accepted';
-            if (k === 'reject') return 'Rejected';
+            const a = (status || '').toLowerCase();
+            if (a.includes('quick')) return 'Quick review';
+            if (a.includes('deep')) return 'Deep review';
+            if (a.includes('ignore')) return 'Ignore';
+            if (a.includes('auto')) return 'Auto-accepted';
+            if (a === 'accept' || a.includes('accepted')) return 'Accepted';
+            if (a.includes('reject')) return 'Rejected';
             return 'Pending';
         }
         function prettyConfidence(conf) {
@@ -2751,23 +2915,23 @@
 
             document.getElementById('panelBody').innerHTML = `
                 <div class="profile-hero">
-                    <div class="hero-avatar ${statusKind(r.action||'')}">${getInit(name)}</div>
+                    <div class="hero-avatar ${reviewCategory(r) ? 'status-' + reviewCategory(r) : ''}">${getInit(name)}</div>
                     <div>
                         <h3>${name}</h3>
                         <p>${title}${title && company ? ' · ' : ''}${company || ''}</p>
                         <div class="badges">
-                            <span class="status-badge ${statusKind(r.action||'')}">${prettyStatus(r.action||'Pending')}</span>
-                            <span class="status-badge" style="background:#262626;color:#e5e5e5">${prettyConfidence(r.confidence||'N/A')} confidence</span>
+                            <span class="status-badge ${statusKind(displayStatus(r))}">${displayStatus(r)}</span>
+                            <span class="status-badge" style="background:#262626;color:#e5e5e5">${prettyConfidence(matchScores(r).confidence||'N/A')} confidence</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="scores-row">
-                    <div class="score-box"><div class="num">${Math.round(r.combined_score||0)}</div><div class="lbl">Combined score</div></div>
-                    <div class="score-box"><div class="num">${Math.round(r.name_ensemble_score||0)}</div><div class="lbl">Name score</div></div>
-                    <div class="score-box"><div class="num">${Math.round(r.location_score||0)}</div><div class="lbl">Location score</div></div>
+                    <div class="score-box"><div class="num">${Math.round(matchScores(r).combined)}</div><div class="lbl">Combined score</div></div>
+                    <div class="score-box"><div class="num">${Math.round(matchScores(r).name)}</div><div class="lbl">Name score</div></div>
+                    <div class="score-box"><div class="num">${Math.round(matchScores(r).location)}</div><div class="lbl">Location score</div></div>
                 </div>
-                ${String(name).trim().toLowerCase() !== String(legacy).trim().toLowerCase() ? `<p class="score-note">Name score is ${Math.round(r.name_ensemble_score||0)} because the source/LinkedIn name “${name}” is not an exact match to the alumni record “${legacy}”. A missing or extra middle initial is enough to drop this below 100.</p>` : ''}
+                ${String(name).trim().toLowerCase() !== String(legacy).trim().toLowerCase() ? `<p class="score-note">Name score is ${Math.round(matchScores(r).name)} because the RocketReach name “${escapeHtml(name)}” is not an exact match to the alumni record “${escapeHtml(legacy)}”.</p>` : ''}
 
                 <div class="section">
                     <div class="section-title">Profile overview</div>
@@ -2778,6 +2942,8 @@
                         <div class="info-box"><div class="field-lbl"><i class="fas fa-envelope"></i> Email</div><div class="field-val">${renderEmailField(r)}</div></div>
                         <div class="info-box"><div class="field-lbl"><i class="fas fa-location-dot"></i> City</div><div class="field-val">${parseLocation(r).city||'N/A'}</div></div>
                         <div class="info-box"><div class="field-lbl"><i class="fas fa-map"></i> State</div><div class="field-val">${parseLocation(r).state||'N/A'}</div></div>
+                        <div class="info-box"><div class="field-lbl"><i class="fas fa-clock"></i> Last updated</div><div class="field-val">${escapeHtml(lastUpdatedStamp(r, id))}</div></div>
+                        <div class="info-box"><div class="field-lbl"><i class="fas fa-user"></i> Updated by</div><div class="field-val">${escapeHtml(updatedByStamp(r, id))}</div></div>
                     </div>
                 </div>
 
@@ -2816,9 +2982,9 @@
                     <div class="review-section">
                         <div class="section-title">Review & comment</div>
                         <div class="review-btns">
-                            <button class="review-btn accept ${rev.action==='accept'?'selected':''}" onclick="setAction('${id}','accept',this)"><i class="fas fa-check"></i> Accept</button>
-                            <button class="review-btn flag ${rev.action==='flag'?'selected':''}" onclick="setAction('${id}','flag',this)"><i class="fas fa-flag"></i> Flag</button>
-                            <button class="review-btn reject ${rev.action==='reject'?'selected':''}" onclick="setAction('${id}','reject',this)"><i class="fas fa-circle-xmark"></i> Reject</button>
+                            <button class="review-btn accept ${reviewCategory(r)==='quick'?'selected':''}" onclick="setAction('${id}','quick',this)"><i class="fas fa-bolt"></i> Quick review</button>
+                            <button class="review-btn flag ${reviewCategory(r)==='deep'?'selected':''}" onclick="setAction('${id}','deep',this)"><i class="fab fa-linkedin"></i> Deep review</button>
+                            <button class="review-btn reject ${reviewCategory(r)==='ignore'?'selected':''}" onclick="setAction('${id}','ignore',this)"><i class="fas fa-eye-slash"></i> Ignore</button>
                         </div>
                         <textarea class="review-comment" id="reviewComment" placeholder="Add a review note for your team...">${rev.comment||''}</textarea>
                         <div class="email-row">
@@ -2854,7 +3020,7 @@
             const comment = document.getElementById('reviewComment').value;
             const send = document.getElementById('sendEmail').checked;
 
-            if(!window.currentAction) { toast('error','Please select an action'); return; }
+            if(!window.currentAction) { toast('error','Please select Quick review, Deep review, or Ignore'); return; }
 
             let reviewer = (currentUser.name || '').trim();
             if (!reviewer) {
@@ -2874,8 +3040,30 @@
                 if (!overwrite) { toast('error', 'Review not saved — kept the existing review.'); return; }
             }
 
-            const record = { action: window.currentAction, comment, timestamp: new Date().toISOString(), name, conf, score, reviewer };
+            const now = new Date().toISOString();
+            const prior = reviews[id];
+            const differentPerson = prior && prior.reviewer && prior.reviewer !== reviewer;
+            const record = {
+                action: window.currentAction,
+                comment,
+                timestamp: now,
+                name,
+                conf,
+                score,
+                reviewer,
+                previous_timestamp: differentPerson ? prior.timestamp : ((prior && prior.previous_timestamp) || now),
+                previous_reviewer: differentPerson ? prior.reviewer : ((prior && prior.previous_reviewer) || reviewer)
+            };
             reviews[id] = record;
+            const person = DATA.find(item => String(item.rr_index) === String(id));
+            if (person) {
+                person.action = window.currentAction;
+                person.review_queue = window.currentAction === 'quick' ? 'QUICK_REVIEW' : window.currentAction === 'deep' ? 'DEEP_REVIEW' : 'IGNORE';
+                person.last_updated = record.previous_timestamp;
+                person.last_updated_by = record.previous_reviewer;
+                person.updated_at = record.timestamp;
+                person.updated_by = reviewer;
+            }
 
             try { localStorage.setItem('miq_reviews', JSON.stringify(reviews)); } catch(e){}
 
@@ -2899,6 +3087,8 @@
             toast('success', 'Review saved and synced!' + (send && emailTo ? ' Email alert sent.' : ''));
             updateStats();
             render();
+            const openIndex = filtered.findIndex(item => String(item.rr_index) === String(id));
+            if (openIndex >= 0) openPanel(openIndex);
         }
 
         function openEmailModal() { openProfileModal(); }

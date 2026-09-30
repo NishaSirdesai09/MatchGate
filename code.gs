@@ -49,7 +49,9 @@ function doGet(e) {
       name: row[4],
       conf: row[5],
       score: row[6],
-      reviewer: row[7]
+      reviewer: row[7],
+      previous_timestamp: row[8] || '',
+      previous_reviewer: row[9] || ''
     };
   }
 
@@ -248,10 +250,55 @@ function attachEmailValidation(result) {
   return result;
 }
 
+var TRACKED_RECORD_FIELDS = {
+  rr_title: 'rr_title',
+  rr_company: 'rr_company',
+  rr_location: 'rr_location',
+  rr_linkedin_url: 'rr_linkedin_url',
+  rr_email: 'rr_email',
+  rr_email_status: 'rr_email_status',
+  review_queue: 'review_queue',
+  action: 'action',
+  last_updated: 'last_updated',
+  last_updated_by: 'last_updated_by',
+  updated_at: 'updated_at',
+  updated_by: 'updated_by'
+};
+
+function ensureColumn(sheet, headers, name) {
+  var idx = headers.indexOf(name);
+  if (idx !== -1) return idx;
+  idx = headers.length;
+  sheet.getRange(1, idx + 1).setValue(name);
+  headers.push(name);
+  return idx;
+}
+
+function appendChangeLog(entries) {
+  if (!entries || !entries.length) return;
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var log = ss.getSheetByName('Change Log');
+  if (!log) {
+    log = ss.insertSheet('Change Log');
+    log.appendRow(['timestamp', 'updated_by', 'rr_index', 'name', 'field', 'previous_value', 'new_value']);
+  }
+  entries.forEach(function(entry) {
+    log.appendRow([
+      entry.timestamp || '',
+      entry.updated_by || '',
+      entry.id || '',
+      entry.name || '',
+      entry.field || '',
+      entry.previous == null ? '' : String(entry.previous),
+      entry.next == null ? '' : String(entry.next)
+    ]);
+  });
+}
+
 function updateRecord(payload) {
   const sheet = getRecordsSheet();
   const data = sheet.getDataRange().getValues();
-  const headers = data[0];
+  const headers = data[0].map(function(header) { return String(header || ''); });
 
   const idColIndex = headers.indexOf('rr_index');
   if (idColIndex === -1) {
@@ -270,25 +317,28 @@ function updateRecord(payload) {
     return { error: true, message: 'Record with id ' + payload.id + ' not found' };
   }
 
-  const fieldMap = {
-    rr_title: 'rr_title',
-    rr_company: 'rr_company',
-    rr_location: 'rr_location',
-    rr_linkedin_url: 'rr_linkedin_url',
-    rr_email: 'rr_email',
-    rr_email_status: 'rr_email_status'
-  };
-
-  Object.keys(fieldMap).forEach(key => {
+  const changes = [];
+  Object.keys(TRACKED_RECORD_FIELDS).forEach(function(key) {
     if (payload[key] === undefined) return;
-    const colName = fieldMap[key];
-    const colIndex = headers.indexOf(colName);
-    if (colIndex !== -1) {
-      sheet.getRange(rowIndex, colIndex + 1).setValue(payload[key]);
-    }
+    const colName = TRACKED_RECORD_FIELDS[key];
+    const colIndex = ensureColumn(sheet, headers, colName);
+    const previous = data[rowIndex - 1][colIndex];
+    const next = payload[key];
+    if (String(previous == null ? '' : previous) === String(next == null ? '' : next)) return;
+    sheet.getRange(rowIndex, colIndex + 1).setValue(next);
+    changes.push({
+      timestamp: payload.last_updated || new Date().toISOString(),
+      updated_by: payload.updated_by || payload.reviewer || '',
+      id: payload.id,
+      name: payload.name || '',
+      field: colName,
+      previous: previous,
+      next: next
+    });
   });
+  appendChangeLog(changes);
 
-  return { status: 'ok', updated_row: rowIndex };
+  return { status: 'ok', updated_row: rowIndex, changes: changes.length };
 }
 
 function doPost(e) {
@@ -327,13 +377,44 @@ function doPost(e) {
     payload.name,
     payload.conf,
     payload.score,
-    payload.reviewer || ''
+    payload.reviewer || '',
+    payload.previous_timestamp || '',
+    payload.previous_reviewer || ''
   ];
 
   if (rowIndex === -1) {
     sheet.appendRow(rowValues);
   } else {
     sheet.getRange(rowIndex, 1, 1, rowValues.length).setValues([rowValues]);
+  }
+
+  var queue = payload.action === 'quick' ? 'QUICK_REVIEW'
+    : payload.action === 'deep' ? 'DEEP_REVIEW'
+    : payload.action === 'ignore' ? 'IGNORE'
+    : '';
+  if (queue) {
+    updateRecord({
+      id: payload.id,
+      name: payload.name || '',
+      action: payload.action,
+      review_queue: queue,
+      last_updated: payload.previous_timestamp || payload.timestamp || new Date().toISOString(),
+      last_updated_by: payload.previous_reviewer || payload.reviewer || '',
+      updated_at: payload.timestamp || new Date().toISOString(),
+      updated_by: payload.reviewer || '',
+      reviewer: payload.reviewer || ''
+    });
+    if (payload.comment) {
+      appendChangeLog([{
+        timestamp: payload.timestamp || new Date().toISOString(),
+        updated_by: payload.reviewer || '',
+        id: payload.id,
+        name: payload.name || '',
+        field: 'comment',
+        previous: '',
+        next: payload.comment
+      }]);
+    }
   }
 
   return ContentService
