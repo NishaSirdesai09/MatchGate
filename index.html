@@ -1426,10 +1426,10 @@
             <h1>Sign in</h1>
             <p>Use the email and password you signed up with.</p>
             <label for="loginEmail">Email</label>
-            <input id="loginEmail" type="email" autocomplete="username" required>
+            <input id="loginEmail" type="email" autocomplete="off" required>
             <label for="loginPassword">Password</label>
             <div class="pw-wrap">
-                <input id="loginPassword" type="password" autocomplete="current-password" required>
+                <input id="loginPassword" type="password" autocomplete="new-password" required>
                 <button type="button" class="pw-eye" aria-label="Show password" onclick="togglePassword('loginPassword', this)"><i class="fas fa-eye"></i></button>
             </div>
             <button type="submit">Sign in</button>
@@ -1444,7 +1444,7 @@
             <label for="signupLast">Last name</label>
             <input id="signupLast" autocomplete="family-name" required>
             <label for="signupEmail">Email</label>
-            <input id="signupEmail" type="email" autocomplete="username" required>
+            <input id="signupEmail" type="email" autocomplete="off" required>
             <label for="signupPassword">Create password</label>
             <div class="pw-wrap">
                 <input id="signupPassword" type="password" autocomplete="new-password" required>
@@ -1930,7 +1930,11 @@
             if (!nameEl) return;
             if (name) {
                 nameEl.textContent = name;
-                if (roleEl) roleEl.textContent = currentUser.role || currentUser.org || 'Reviewer';
+                if (roleEl) {
+                    const role = currentUser.role || currentUser.org || '';
+                    roleEl.textContent = role;
+                    roleEl.hidden = !role;
+                }
                 applyPhoto(avEl, currentUser.photo, getInitials(name));
             } else {
                 nameEl.textContent = 'Not signed in';
@@ -2037,8 +2041,27 @@
                 localStorage.removeItem('miq_session');
             } catch(e){}
             applyUserToUI();
+            showSignIn();
+            clearAuthForms();
             document.getElementById('loginGate').hidden = false;
             toast('success', 'Logged out.');
+        }
+
+        function clearAuthForms() {
+            ['loginEmail', 'loginPassword', 'signupFirst', 'signupLast', 'signupEmail', 'signupPassword', 'signupConfirm'].forEach(id => {
+                const field = document.getElementById(id);
+                if (!field) return;
+                field.value = '';
+                if (field.type === 'text' && id.toLowerCase().includes('password')) field.type = 'password';
+            });
+            document.querySelectorAll('.pw-eye').forEach(button => {
+                button.innerHTML = '<i class="fas fa-eye"></i>';
+                button.setAttribute('aria-label', 'Show password');
+            });
+            const loginError = document.getElementById('loginError');
+            const signupError = document.getElementById('signupError');
+            if (loginError) loginError.textContent = '';
+            if (signupError) signupError.textContent = '';
         }
 
         async function signIn(event) {
